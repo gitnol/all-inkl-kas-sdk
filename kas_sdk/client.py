@@ -5,6 +5,7 @@ from typing import Dict, Any, Optional
 import time
 import os
 import logging
+from .exceptions import KasApiError, KasAuthError, KasConnectionError
 
 try:
     from dotenv import load_dotenv
@@ -44,7 +45,7 @@ class KasClient:
         # 1. Resolve Login
         self.kas_login = kas_login or os.getenv('KAS_LOGIN')
         if not self.kas_login:
-             raise ValueError("KAS Login is required. Provide it as argument or set KAS_LOGIN environment variable.")
+            raise KasAuthError("KAS Login is required. Provide it as argument or set KAS_LOGIN environment variable.")
 
         # 2. Resolve Password
         self.kas_auth_data = kas_auth_data or os.getenv('KAS_PASS')
@@ -82,55 +83,43 @@ class KasClient:
             logger.warning("KAS SDK is running in DRY-RUN mode. No requests will be sent.")
             
         self._last_request_time = 0.0
-        
-        # Initialize Services (Lazy loaded or explicitly)
-        from .services.dns import DnsService
-        from .services.account import AccountService
-        from .services.domain import DomainService
-        from .services.mailaccount import MailAccountService
-        from .services.cronjob import CronjobService
-        from .services.database import DatabaseService
-        from .services.ftpuser import FtpUserService
-        from .services.softwareinstall import SoftwareInstallService
-        # Batch 1
-        from .services.mailfilter import MailFilterService
-        from .services.mailforward import MailForwardService
-        from .services.mailinglist import MailingListService
-        # Batch 2
-        from .services.ddns import DdnsService
-        from .services.subdomain import SubdomainService
-        from .services.symlink import SymlinkService
-        from .services.ssl import SslService
-        # Batch 3
-        from .services.sambauser import SambaUserService
-        from .services.chown import ChownService
-        from .services.directoryprotection import DirectoryProtectionService
-        from .services.session import SessionService
-        from .services.statistic import StatisticService
-        from .services.dkim import DkimService
 
-        self.account = AccountService(self)
-        self.dns = DnsService(self)
-        self.domain = DomainService(self)
-        self.mailaccount = MailAccountService(self)
-        self.cronjob = CronjobService(self)
-        self.database = DatabaseService(self)
-        self.ftpuser = FtpUserService(self)
-        self.softwareinstall = SoftwareInstallService(self)
-        
-        self.mailfilter = MailFilterService(self)
-        self.mailforward = MailForwardService(self)
-        self.mailinglist = MailingListService(self)
-        self.ddns = DdnsService(self)
-        self.subdomain = SubdomainService(self)
-        self.symlink = SymlinkService(self)
-        self.ssl = SslService(self)
-        self.sambauser = SambaUserService(self)
-        self.chown = ChownService(self)
-        self.directoryprotection = DirectoryProtectionService(self)
-        self.session = SessionService(self)
-        self.statistic = StatisticService(self)
-        self.dkim = DkimService(self)
+    # Maps service attribute name -> (module path, class name)
+    _SERVICE_MAP = {
+        'account':             ('kas_sdk.services.account',             'AccountService'),
+        'dns':                 ('kas_sdk.services.dns',                 'DnsService'),
+        'domain':              ('kas_sdk.services.domain',              'DomainService'),
+        'mailaccount':         ('kas_sdk.services.mailaccount',         'MailAccountService'),
+        'cronjob':             ('kas_sdk.services.cronjob',             'CronjobService'),
+        'database':            ('kas_sdk.services.database',            'DatabaseService'),
+        'ftpuser':             ('kas_sdk.services.ftpuser',             'FtpUserService'),
+        'softwareinstall':     ('kas_sdk.services.softwareinstall',     'SoftwareInstallService'),
+        'mailfilter':          ('kas_sdk.services.mailfilter',          'MailFilterService'),
+        'mailforward':         ('kas_sdk.services.mailforward',         'MailForwardService'),
+        'mailinglist':         ('kas_sdk.services.mailinglist',         'MailingListService'),
+        'ddns':                ('kas_sdk.services.ddns',                'DdnsService'),
+        'subdomain':           ('kas_sdk.services.subdomain',           'SubdomainService'),
+        'symlink':             ('kas_sdk.services.symlink',             'SymlinkService'),
+        'ssl':                 ('kas_sdk.services.ssl',                 'SslService'),
+        'sambauser':           ('kas_sdk.services.sambauser',           'SambaUserService'),
+        'chown':               ('kas_sdk.services.chown',               'ChownService'),
+        'directoryprotection': ('kas_sdk.services.directoryprotection', 'DirectoryProtectionService'),
+        'session':             ('kas_sdk.services.session',             'SessionService'),
+        'statistic':           ('kas_sdk.services.statistic',           'StatisticService'),
+        'dkim':                ('kas_sdk.services.dkim',                'DkimService'),
+    }
+
+    def __getattr__(self, name: str):
+        """Lazily imports and instantiates a service on first access."""
+        if name in self._SERVICE_MAP:
+            import importlib
+            module_path, class_name = self._SERVICE_MAP[name]
+            module = importlib.import_module(module_path)
+            service = getattr(module, class_name)(self)
+            # Cache on instance so subsequent accesses skip __getattr__
+            object.__setattr__(self, name, service)
+            return service
+        raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
 
     def request(self, action: str, params: Dict[str, Any]) -> Any:
         """
@@ -192,9 +181,10 @@ class KasClient:
             self._last_request_time = time.time()
             response.raise_for_status()
             return self._parse_soap_map(response.content)
+        except KasApiError:
+            raise
         except Exception as e:
-            # Re-raise as a more specific client error or let it bubble up
-            raise ConnectionError(f"HTTP Request failed: {e}")
+            raise KasConnectionError(f"HTTP Request failed: {e}") from e
 
     def _parse_soap_map(self, xml_content: bytes) -> Any:
         try:
@@ -203,7 +193,7 @@ class KasClient:
             # Check for Faults
             for elem in root.iter():
                 if 'faultstring' in elem.tag and elem.text:
-                    raise Exception(f"KAS API Fault: {elem.text.strip()}")
+                    raise KasApiError(f"KAS API Fault: {elem.text.strip()}")
 
             # Find return node
             return_node = None
@@ -225,53 +215,44 @@ class KasClient:
             return result
 
         except ET.ParseError as e:
-            raise ValueError(f"Could not parse XML response: {e}")
+            raise KasApiError(f"Could not parse XML response: {e}") from e
+
+    @staticmethod
+    def _local_tag(element: ET.Element) -> str:
+        """Returns the local tag name without XML namespace prefix."""
+        tag = element.tag
+        return tag.split('}', 1)[1] if '}' in tag else tag
 
     def _parse_element(self, element: ET.Element) -> Any:
         """
         Recursively parses an XML element into Python types (Dict, List, String).
         KAS API typically uses <item><key>...</key><value>...</value></item> for Maps.
         """
-        # If the element has children, inspect them
         children = list(element)
         if not children:
             return element.text.strip() if element.text else ""
 
-        # Check if it's a Map/List (composed of <item>)
-        is_map = True
         parsed_dict = {}
         parsed_list = []
-        
-        # We need to distinguish between a Map (key/value pairs) and a List (just items)
-        # However, KAS often returns Lists as Maps with integer keys (0, 1, 2...), or just items.
-        # Let's try to parse as items first.
-        
+
         for child in children:
-            if 'item' in child.tag or child.tag == 'item': # It's an item in a collection
-                # Extract key and value if present
+            if self._local_tag(child) == 'item':
                 key_node = None
                 value_node = None
-                # Since namespaces can vary, just search by tag name content
                 for sub in child:
-                    if 'key' in sub.tag: key_node = sub
-                    elif 'value' in sub.tag: value_node = sub
-                
+                    local = self._local_tag(sub)
+                    if local == 'key':
+                        key_node = sub
+                    elif local == 'value':
+                        value_node = sub
+
                 if key_node is not None and value_node is not None:
-                    # It's a Map Entry
                     key = key_node.text.strip() if key_node.text else ""
-                    val = self._parse_element(value_node)
-                    parsed_dict[key] = val
+                    parsed_dict[key] = self._parse_element(value_node)
                 else:
-                    # It's a List Item without explicit Key/Value structure (uncommon in KAS but possible)
-                    # OR it's a value directly inside the item?
-                    # Actually, looking at KAS docs, it's almost always Map.
-                    # If we fail to find key/value, we treat the child itself as a value?
                     parsed_list.append(self._parse_element(child))
-                    is_map = False
             else:
-                # Regular XML children (not items) -> treat as Dict
-                # This handles wrapper tags if any
-                parsed_dict[child.tag] = self._parse_element(child)
+                parsed_dict[self._local_tag(child)] = self._parse_element(child)
 
         if parsed_dict:
             # Heuristic: If all keys are integers '0', '1', '2'..., likely a List
