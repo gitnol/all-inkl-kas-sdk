@@ -236,5 +236,85 @@ class TestDryRunMode(unittest.TestCase):
             self.assertTrue(client.dry_run)
 
 
+class TestAccountValidation(unittest.TestCase):
+    """Test parameter validation for add_account."""
+
+    def setUp(self):
+        self.client = KasClient('user', 'pass')
+
+    def test_invalid_hostname_art_raises_value_error(self):
+        with self.assertRaises(ValueError) as ctx:
+            self.client.account.add_account(
+                account_kas_password='pass', account_ftp_password='ftp',
+                hostname_art='invalid'
+            )
+        self.assertIn('hostname_art', str(ctx.exception))
+
+    def test_domain_without_parts_raises_value_error(self):
+        with self.assertRaises(ValueError) as ctx:
+            self.client.account.add_account(
+                account_kas_password='pass', account_ftp_password='ftp',
+                hostname_art='domain'
+            )
+        self.assertIn('hostname_part1', str(ctx.exception))
+
+    def test_subdomain_without_parts_raises_value_error(self):
+        with self.assertRaises(ValueError):
+            self.client.account.add_account(
+                account_kas_password='pass', account_ftp_password='ftp',
+                hostname_art='subdomain', hostname_part1='forum'
+            )
+
+    def test_empty_hostname_art_does_not_require_parts(self):
+        """hostname_art='' creates an account without host — no parts needed."""
+        with patch('kas_sdk.client.requests.post') as mock_post:
+            mock_post.return_value.content = XML_SUCCESS_SIMPLE
+            result = self.client.account.add_account(
+                account_kas_password='pass', account_ftp_password='ftp',
+                hostname_art=''
+            )
+            self.assertTrue(result)
+
+    def test_invalid_logging_raises_value_error(self):
+        with self.assertRaises(ValueError) as ctx:
+            self.client.account.add_account(
+                account_kas_password='pass', account_ftp_password='ftp',
+                hostname_art='', logging='debug'
+            )
+        self.assertIn('logging', str(ctx.exception))
+
+    def test_invalid_statistic_raises_value_error(self):
+        with self.assertRaises(ValueError):
+            self.client.account.add_account(
+                account_kas_password='pass', account_ftp_password='ftp',
+                hostname_art='', statistic='fr'
+            )
+
+    def test_logage_out_of_range_raises_value_error(self):
+        with self.assertRaises(ValueError):
+            self.client.account.add_account(
+                account_kas_password='pass', account_ftp_password='ftp',
+                hostname_art='', logage=0
+            )
+
+    @patch('kas_sdk.client.requests.post')
+    def test_valid_domain_account(self, mock_post):
+        mock_post.return_value.content = XML_SUCCESS_SIMPLE
+        result = self.client.account.add_account(
+            account_kas_password='pass', account_ftp_password='ftp',
+            hostname_art='domain', hostname_part1='meine-domain', hostname_part2='de'
+        )
+        self.assertTrue(result)
+
+    @patch('kas_sdk.client.requests.post')
+    def test_valid_subdomain_account(self, mock_post):
+        mock_post.return_value.content = XML_SUCCESS_SIMPLE
+        result = self.client.account.add_account(
+            account_kas_password='pass', account_ftp_password='ftp',
+            hostname_art='subdomain', hostname_part1='forum', hostname_part2='meine-domain.de'
+        )
+        self.assertTrue(result)
+
+
 if __name__ == '__main__':
     unittest.main()

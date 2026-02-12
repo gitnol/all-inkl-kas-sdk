@@ -25,6 +25,9 @@ nul
 # KAS SDK Specific
 *.log
 
+# Third-party API documentation (not checked in — obtain from all-inkl.com KAS panel)
+API Funktionen.html
+
 debug_output.txt
 
 # KAS Export Reports

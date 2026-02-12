@@ -6,6 +6,12 @@ class AccountService(BaseService):
     Handles Account operations.
     """
 
+    # Valid values for enum-style parameters
+    _HOSTNAME_ART_VALUES = ("domain", "subdomain", "")
+    _LOGGING_VALUES = ("voll", "kurz", "ohneip", "keine")
+    _STATISTIC_VALUES = ("0", "de", "en")
+    _YES_NO = ("Y", "N")
+
     def get_accounts(self, account_login: str = None) -> List[Dict[str, Any]]:
         """
         Auslesen der Accounts
@@ -19,11 +25,11 @@ class AccountService(BaseService):
         return []
 
     def add_account(
-        self, 
-        account_kas_password: str, 
-        account_ftp_password: str, 
-        hostname_art: str, 
-        hostname_part1: str = None, 
+        self,
+        account_kas_password: str,
+        account_ftp_password: str,
+        hostname_art: str,
+        hostname_part1: str = None,
         hostname_part2: str = None,
         account_comment: str = None,
         account_contact_mail: str = None,
@@ -50,14 +56,54 @@ class AccountService(BaseService):
         show_password: str = None,
     ) -> bool:
         """
-        Anlegen eines Accounts
+        Anlegen eines Accounts.
+
+        hostname_art bestimmt die Bedeutung von hostname_part1/part2:
+
+        - hostname_art="domain":
+            hostname_part1 = Domain-Label (z.B. "meine-domain")
+            hostname_part2 = TLD (z.B. "com", "de")
+        - hostname_art="subdomain":
+            hostname_part1 = Subdomain-Label (z.B. "forum")
+            hostname_part2 = Domain (z.B. "meine-domain.de")
+        - hostname_art="" (leer):
+            Account ohne Host — hostname_part1/part2 werden ignoriert.
+
+        Raises:
+            ValueError: Bei ungültiger hostname_art oder fehlenden Pflichtparametern.
         """
+        # --- Validation ---
+        if hostname_art not in self._HOSTNAME_ART_VALUES:
+            raise ValueError(
+                f"hostname_art must be one of {self._HOSTNAME_ART_VALUES}, got '{hostname_art}'"
+            )
+
+        if hostname_art in ("domain", "subdomain"):
+            if not hostname_part1 or not hostname_part2:
+                raise ValueError(
+                    f"hostname_art='{hostname_art}' requires both hostname_part1 and hostname_part2"
+                )
+
+        if logging is not None and logging not in self._LOGGING_VALUES:
+            raise ValueError(
+                f"logging must be one of {self._LOGGING_VALUES}, got '{logging}'"
+            )
+
+        if statistic is not None and statistic not in self._STATISTIC_VALUES:
+            raise ValueError(
+                f"statistic must be one of {self._STATISTIC_VALUES}, got '{statistic}'"
+            )
+
+        if logage is not None and not (1 <= logage <= 999):
+            raise ValueError(f"logage must be between 1 and 999, got {logage}")
+
+        # --- Build request ---
         params = {
             'account_kas_password': account_kas_password,
             'account_ftp_password': account_ftp_password,
-            'hostname_art': hostname_art
+            'hostname_art': hostname_art,
         }
-        
+
         optional_params = {
             'hostname_part1': hostname_part1,
             'hostname_part2': hostname_part2,
@@ -85,11 +131,11 @@ class AccountService(BaseService):
             'dns_settings': dns_settings,
             'show_password': show_password,
         }
-        
+
         for k, v in optional_params.items():
             if v is not None:
                 params[k] = v
-        
+
         res = self.client.request('add_account', params)
         return res.get('ReturnString') == 'TRUE'
 
