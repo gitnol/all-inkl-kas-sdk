@@ -193,6 +193,10 @@ def main():
     md.append(f"**Date**: {now_str}  ")
     md.append(f"**Account**: `{login}`")
     md.append("")
+    if not _MASK_PASSWORDS:
+        md.append("> [!WARNING]")
+        md.append("> **This export contains PLAINTEXT PASSWORDS.** Generated with `--show-passwords`.")
+        md.append("")
     md.append("---")
     md.append("")
 
