@@ -1,4 +1,4 @@
-from kas_sdk import KasClient
+from kas_sdk import KasClient, KasApiError, KasConnectionError
 from kas_sdk.utils import get_kas_credentials, get_dry_run_preference, print_table
 import os
 
@@ -88,12 +88,8 @@ def main():
                     )
                     print(f"Update successful: {success}")
                     
-            except Exception as api_err:
-                 error_msg = str(api_err)
-                 if "nothing_to_do" in error_msg:
-                     print("Update check: Data is identical (nothing to do). This is expected.")
-                 else:
-                     print(f"API Call failed (Expected if using dummy creds): {api_err}")
+            except KasApiError as api_err:
+                print(f"API Call failed: {api_err}")
         else:
             print("Skipping DNS Demo.")
 
@@ -152,10 +148,10 @@ def main():
         # client.dkim.get_dkim(host="example.com")
         pass
 
-    except Exception as e:
-        print(f"General Error: {e}")
-        import traceback
-        traceback.print_exc()
+    except KasConnectionError as e:
+        print(f"Connection error: {e}")
+    except KasApiError as e:
+        print(f"API error: {e}")
 
 if __name__ == "__main__":
     main()
