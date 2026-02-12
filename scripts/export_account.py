@@ -26,6 +26,7 @@ Output:
 - Generates a file: output/kas_export_YYYY-MM-DD_HHMM.md
 """
 
+import argparse
 import datetime
 import os
 from tabulate import tabulate
@@ -37,12 +38,15 @@ from kas_sdk.utils import get_kas_credentials
 # Helpers
 # ---------------------------------------------------------------------------
 
-SENSITIVE_KEYWORDS = ("password", "passwd", "auth_data", "secret", "token")
+SENSITIVE_KEYWORDS = ("password", "passwort", "passwd", "auth_data", "secret", "token")
+
+# Set to True by default; disabled via --show-passwords CLI flag.
+_MASK_PASSWORDS = True
 
 
 def mask_value(key, value):
-    """Mask sensitive values like passwords."""
-    if any(kw in key.lower() for kw in SENSITIVE_KEYWORDS):
+    """Mask sensitive values like passwords (covers English and German spellings)."""
+    if _MASK_PASSWORDS and any(kw in key.lower() for kw in SENSITIVE_KEYWORDS):
         return "***"
     return value
 
@@ -150,6 +154,20 @@ def fetch_safe(label, func, *args, **kwargs):
 # ---------------------------------------------------------------------------
 
 def main():
+    global _MASK_PASSWORDS
+
+    parser = argparse.ArgumentParser(description="KAS Configuration Export")
+    parser.add_argument(
+        "--show-passwords",
+        action="store_true",
+        help="Include plaintext passwords in the export (default: masked with ***).",
+    )
+    args = parser.parse_args()
+
+    if args.show_passwords:
+        _MASK_PASSWORDS = False
+        print("WARNING: Password masking is DISABLED. The export will contain plaintext credentials.")
+
     print("=== KAS Configuration Export ===")
 
     # 1. Credentials
