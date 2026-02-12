@@ -150,3 +150,14 @@ pytest tests/
 ```
 
 The test suite runs without API credentials and covers payload construction, XML parsing (including namespace-prefixed responses), exception hierarchy, and service integration.
+
+## Disclaimer
+
+This project is **not affiliated with, endorsed by, or connected to** [ALL-INKL.COM - Neue Medien Muennich](https://all-inkl.com/) in any way.
+It is an independent, community-driven effort to make the KAS SOAP API accessible and easy to use from Python.
+
+All product names, trademarks, and registered trademarks are the property of their respective owners.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE) — free for personal and commercial use.
