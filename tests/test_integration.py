@@ -237,7 +237,7 @@ class TestDryRunMode(unittest.TestCase):
 
 
 class TestAccountValidation(unittest.TestCase):
-    """Test parameter validation for add_account."""
+    """Test parameter validation for add_account and update_account."""
 
     def setUp(self):
         self.client = KasClient('user', 'pass')
@@ -312,6 +312,40 @@ class TestAccountValidation(unittest.TestCase):
         result = self.client.account.add_account(
             account_kas_password='pass', account_ftp_password='ftp',
             hostname_art='subdomain', hostname_part1='forum', hostname_part2='meine-domain.de'
+        )
+        self.assertTrue(result)
+
+
+    # --- update_account validation ---
+
+    def test_update_account_invalid_logging_raises_value_error(self):
+        with self.assertRaises(ValueError) as ctx:
+            self.client.account.update_account(
+                account_login='w0123456', account_kas_password='pass',
+                logging='debug'
+            )
+        self.assertIn('logging', str(ctx.exception))
+
+    def test_update_account_invalid_statistic_raises_value_error(self):
+        with self.assertRaises(ValueError):
+            self.client.account.update_account(
+                account_login='w0123456', account_kas_password='pass',
+                statistic='fr'
+            )
+
+    def test_update_account_logage_out_of_range_raises_value_error(self):
+        with self.assertRaises(ValueError):
+            self.client.account.update_account(
+                account_login='w0123456', account_kas_password='pass',
+                logage=1000
+            )
+
+    @patch('kas_sdk.client.requests.post')
+    def test_update_account_valid_call(self, mock_post):
+        mock_post.return_value.content = XML_SUCCESS_SIMPLE
+        result = self.client.account.update_account(
+            account_login='w0123456', account_kas_password='pass',
+            logging='kurz', statistic='de', logage=30
         )
         self.assertTrue(result)
 

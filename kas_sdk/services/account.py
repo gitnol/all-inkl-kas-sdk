@@ -148,9 +148,9 @@ class AccountService(BaseService):
         return res.get('ReturnString') == 'TRUE'
 
     def update_account(
-        self, 
-        account_login: str, 
-        account_kas_password: str = None,
+        self,
+        account_login: str,
+        account_kas_password: str,
         max_account: int = None,
         max_domain: int = None,
         max_subdomain: int = None,
@@ -172,15 +172,30 @@ class AccountService(BaseService):
         statistic: str = None,
         dns_settings: str = None,
         account_comment: str = None,
-        account_contact_mail: str = None
+        account_contact_mail: str = None,
     ) -> bool:
         """
-        Bearbeiten eines Accounts
+        Bearbeiten eines Accounts.
+
+        Raises:
+            ValueError: Bei ungültigem logging, statistic oder logage-Wert.
         """
-        params = {'account_login': account_login}
-        
+        if logging is not None and logging not in self._LOGGING_VALUES:
+            raise ValueError(
+                f"logging must be one of {self._LOGGING_VALUES}, got '{logging}'"
+            )
+
+        if statistic is not None and statistic not in self._STATISTIC_VALUES:
+            raise ValueError(
+                f"statistic must be one of {self._STATISTIC_VALUES}, got '{statistic}'"
+            )
+
+        if logage is not None and not (1 <= logage <= 999):
+            raise ValueError(f"logage must be between 1 and 999, got {logage}")
+
+        params = {'account_login': account_login, 'account_kas_password': account_kas_password}
+
         optional_params = {
-            'account_kas_password': account_kas_password,
             'max_account': max_account,
             'max_domain': max_domain,
             'max_subdomain': max_subdomain,
