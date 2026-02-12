@@ -59,23 +59,42 @@ def format_section(data, title, level=3):
     """
     Auto-detect columns from data and render as a Markdown table.
     Handles: list of dicts, single dict, empty data, error strings.
+    Nested dicts are expanded as sub-sections (single-dict) or
+    inline key=value pairs (list-of-dicts) instead of being truncated.
     """
     heading = "#" * level
+    sub_heading = "#" * (level + 1)
+
     if not data:
         return f"{heading} {title}\n*No data found.*\n"
 
     if isinstance(data, str):
         return f"{heading} {title}\n> {data}\n"
 
-    # Single dict -> key/value list (vertical layout)
+    # Single dict -> key/value layout.
+    # Values that are themselves dicts get their own sub-section table.
     if isinstance(data, dict):
-        rows = [[k, truncate(mask_value(k, v))] for k, v in data.items()]
-        table = tabulate(rows, headers=["Key", "Value"], tablefmt="github")
-        return f"{heading} {title}\n\n{table}\n"
+        flat_rows = []
+        sub_sections = []
 
-    # List of dicts -> horizontal table with auto-detected headers
+        for k, v in data.items():
+            if isinstance(v, dict):
+                sub_rows = [[sk, truncate(mask_value(sk, sv))] for sk, sv in v.items()]
+                sub_table = tabulate(sub_rows, headers=["Key", "Value"], tablefmt="github")
+                sub_sections.append(f"{sub_heading} {k}\n\n{sub_table}\n")
+            else:
+                flat_rows.append([k, truncate(mask_value(k, v))])
+
+        parts = [f"{heading} {title}\n"]
+        if flat_rows:
+            table = tabulate(flat_rows, headers=["Key", "Value"], tablefmt="github")
+            parts.append(f"\n{table}\n")
+        parts.extend(sub_sections)
+        return "\n".join(parts)
+
+    # List of dicts -> horizontal table with auto-detected headers.
+    # Cell values that are dicts are rendered as compact "k=v, k=v" strings.
     if isinstance(data, list) and len(data) > 0:
-        # Collect ALL keys across all records (union)
         all_keys = []
         seen = set()
         for item in data:
@@ -91,9 +110,15 @@ def format_section(data, title, level=3):
         rows = []
         for item in data:
             if isinstance(item, dict):
-                rows.append(
-                    [truncate(mask_value(k, item.get(k, ""))) for k in all_keys]
-                )
+                row = []
+                for k in all_keys:
+                    v = item.get(k, "")
+                    if isinstance(v, dict):
+                        cell = ", ".join(f"{sk}={mask_value(sk, sv)}" for sk, sv in v.items())
+                        row.append(cell)
+                    else:
+                        row.append(truncate(mask_value(k, v)))
+                rows.append(row)
             else:
                 rows.append([truncate(str(item))])
 
