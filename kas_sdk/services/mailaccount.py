@@ -1,10 +1,14 @@
 from .base import BaseService
 from typing import Dict, Any, List
 
+
 class MailAccountService(BaseService):
     """
     Handles MailAccount operations.
     """
+
+    _YES_NO = ("Y", "N")
+    _MAIL_CONTENT_TYPE_VALUES = ("text", "html")
 
     def get_mailaccounts(self, mail_login: str = None) -> List[Dict[str, Any]]:
         params = {}
@@ -12,14 +16,14 @@ class MailAccountService(BaseService):
             params['mail_login'] = mail_login
         res = self.client.request('get_mailaccounts', params)
         if res and 'ReturnInfo' in res:
-             return res['ReturnInfo']
+            return res['ReturnInfo']
         return []
 
     def add_mailaccount(
-        self, 
-        mail_password: str, 
-        local_part: str, 
-        domain_part: str, 
+        self,
+        mail_password: str,
+        local_part: str,
+        domain_part: str,
         webmail_autologin: str = 'Y',
         responder: str = 'N',
         mail_responder_content_type: str = 'text',
@@ -36,7 +40,25 @@ class MailAccountService(BaseService):
     ) -> str:
         """
         Add a new mail account.
+
+        Raises:
+            ValueError: Bei ungültigem Y/N- oder content-type-Wert.
         """
+        for param_name, param_val in [
+            ('webmail_autologin', webmail_autologin),
+            ('responder', responder),
+            ('mail_xlist_enabled', mail_xlist_enabled),
+        ]:
+            if param_val not in self._YES_NO:
+                raise ValueError(
+                    f"{param_name} must be one of {self._YES_NO}, got '{param_val}'"
+                )
+
+        if mail_responder_content_type not in self._MAIL_CONTENT_TYPE_VALUES:
+            raise ValueError(
+                f"mail_responder_content_type must be one of {self._MAIL_CONTENT_TYPE_VALUES}, got '{mail_responder_content_type}'"
+            )
+
         params = {
             'mail_password': mail_password,
             'local_part': local_part,
@@ -64,8 +86,8 @@ class MailAccountService(BaseService):
         return res.get('ReturnString') == 'TRUE'
 
     def update_mailaccount(
-        self, 
-        mail_login: str, 
+        self,
+        mail_login: str,
         mail_new_password: str = None,
         webmail_autologin: str = None,
         responder: str = None,
@@ -82,8 +104,28 @@ class MailAccountService(BaseService):
         mail_xlist_spam: str = None,
         mail_xlist_archiv: str = None,
     ) -> bool:
+        """
+        Raises:
+            ValueError: Bei ungültigem Y/N- oder content-type-Wert.
+        """
+        for param_name, param_val in [
+            ('webmail_autologin', webmail_autologin),
+            ('responder', responder),
+            ('is_active', is_active),
+            ('mail_xlist_enabled', mail_xlist_enabled),
+        ]:
+            if param_val is not None and param_val not in self._YES_NO:
+                raise ValueError(
+                    f"{param_name} must be one of {self._YES_NO}, got '{param_val}'"
+                )
+
+        if mail_responder_content_type is not None and mail_responder_content_type not in self._MAIL_CONTENT_TYPE_VALUES:
+            raise ValueError(
+                f"mail_responder_content_type must be one of {self._MAIL_CONTENT_TYPE_VALUES}, got '{mail_responder_content_type}'"
+            )
+
         params = {'mail_login': mail_login}
-        
+
         optional_params = {
             'mail_new_password': mail_new_password,
             'webmail_autologin': webmail_autologin,
@@ -101,7 +143,7 @@ class MailAccountService(BaseService):
             'mail_xlist_spam': mail_xlist_spam,
             'mail_xlist_archiv': mail_xlist_archiv,
         }
-        
+
         for k, v in optional_params.items():
             if v is not None:
                 params[k] = v

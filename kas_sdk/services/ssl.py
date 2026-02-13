@@ -1,10 +1,13 @@
 from .base import BaseService
 from typing import Dict, Any, List
 
+
 class SslService(BaseService):
     """
     Handles SSL operations.
     """
+
+    _YES_NO = ("Y", "N")
 
     def update_ssl(
         self,
@@ -29,7 +32,20 @@ class SslService(BaseService):
             ssl_certificate_sni_bundle (str): CA Bundle (optional).
             ssl_certificate_force_https (str): 'Y'|'N' (optional).
             ssl_certificate_hsts_max_age (int): Seconds for HSTS (-1 to disable, optional).
+
+        Raises:
+            ValueError: Bei ungültigem Y/N-Wert.
         """
+        if ssl_certificate_is_active is not None and ssl_certificate_is_active not in self._YES_NO:
+            raise ValueError(
+                f"ssl_certificate_is_active must be one of {self._YES_NO}, got '{ssl_certificate_is_active}'"
+            )
+
+        if ssl_certificate_force_https is not None and ssl_certificate_force_https not in self._YES_NO:
+            raise ValueError(
+                f"ssl_certificate_force_https must be one of {self._YES_NO}, got '{ssl_certificate_force_https}'"
+            )
+
         params = {}
 
         if hostname: params['hostname'] = hostname
@@ -42,12 +58,12 @@ class SslService(BaseService):
         if ssl_certificate_hsts_max_age is not None: params['ssl_certificate_hsts_max_age'] = ssl_certificate_hsts_max_age
 
         res = self.client.request('update_ssl', params)
-        
+
         if res.get('ReturnString') == 'TRUE':
             return True
-            
+
         # Handle "nothing_to_do" as success (common in HSTS updates)
         if 'nothing_to_do' in res.get('Error', ''):
             return True
-            
+
         return False

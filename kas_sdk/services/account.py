@@ -257,18 +257,34 @@ class AccountService(BaseService):
         return {}
 
     def update_accountsettings(
-        self, 
+        self,
         account_password: str = None,
         show_password: str = None,
         logging: str = None,
         logage: int = None,
         statistic: str = None,
         account_comment: str = None,
-        account_contact_mail: str = None
+        account_contact_mail: str = None,
     ) -> bool:
         """
-        Bearbeiten der eigenen Accounteinstellungen
+        Bearbeiten der eigenen Accounteinstellungen.
+
+        Raises:
+            ValueError: Bei ungültigem logging, statistic oder logage-Wert.
         """
+        if logging is not None and logging not in self._LOGGING_VALUES:
+            raise ValueError(
+                f"logging must be one of {self._LOGGING_VALUES}, got '{logging}'"
+            )
+
+        if statistic is not None and statistic not in self._STATISTIC_VALUES:
+            raise ValueError(
+                f"statistic must be one of {self._STATISTIC_VALUES}, got '{statistic}'"
+            )
+
+        if logage is not None and not (1 <= logage <= 999):
+            raise ValueError(f"logage must be between 1 and 999, got {logage}")
+
         params = {}
         
         optional_params = {

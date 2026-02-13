@@ -1,10 +1,13 @@
 from .base import BaseService
 from typing import Dict, Any, List
 
+
 class SubdomainService(BaseService):
     """
     Handles Subdomain operations.
     """
+
+    _YES_NO = ("Y", "N")
 
     def get_subdomains(self, subdomain_name: str = None) -> List[Dict[str, Any]]:
         """
@@ -27,14 +30,14 @@ class SubdomainService(BaseService):
         redirect_status: int = None,
         statistic_version: int = None,
         statistic_language: str = None,
-        php_version: str = None
+        php_version: str = None,
     ) -> str:
         """
         Anlegen einer Subdomain
         """
         params = {
             'subdomain_name': subdomain_name,
-            'domain_name': domain_name
+            'domain_name': domain_name,
         }
         if subdomain_path:
             params['subdomain_path'] = subdomain_path
@@ -64,18 +67,26 @@ class SubdomainService(BaseService):
         subdomain_path: str = None,
         redirect_status: int = None,
         php_version: str = None,
-        is_active: str = None
+        is_active: str = None,
     ) -> bool:
         """
-        Bearbeiten einer Subdomain
+        Bearbeiten einer Subdomain.
+
+        Raises:
+            ValueError: Bei ungültigem is_active-Wert.
         """
+        if is_active is not None and is_active not in self._YES_NO:
+            raise ValueError(
+                f"is_active must be one of {self._YES_NO}, got '{is_active}'"
+            )
+
         params = {'subdomain_name': subdomain_name}
 
         optional_params = {
             'subdomain_path': subdomain_path,
             'redirect_status': redirect_status,
             'php_version': php_version,
-            'is_active': is_active
+            'is_active': is_active,
         }
 
         for k, v in optional_params.items():

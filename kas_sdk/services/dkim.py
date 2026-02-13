@@ -1,10 +1,13 @@
 from .base import BaseService
 from typing import Dict, Any, List
 
+
 class DkimService(BaseService):
     """
     Handles DKIM (DomainKeys Identified Mail) operations.
     """
+
+    _YES_NO = ("Y", "N")
 
     def get_dkim(self, host: str) -> List[Dict[str, Any]]:
         """
@@ -18,11 +21,19 @@ class DkimService(BaseService):
 
     def add_dkim(self, host: str, check_foreign_nameserver: str = "Y") -> bool:
         """
-        Anlegen eines DKIM Eintrages
+        Anlegen eines DKIM Eintrages.
+
+        Raises:
+            ValueError: Bei ungültigem check_foreign_nameserver-Wert.
         """
+        if check_foreign_nameserver not in self._YES_NO:
+            raise ValueError(
+                f"check_foreign_nameserver must be one of {self._YES_NO}, got '{check_foreign_nameserver}'"
+            )
+
         params = {
             'host': host,
-            'check_foreign_nameserver': check_foreign_nameserver
+            'check_foreign_nameserver': check_foreign_nameserver,
         }
         res = self.client.request('add_dkim', params)
         return res.get('ReturnString') == 'TRUE'

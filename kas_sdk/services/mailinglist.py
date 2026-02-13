@@ -1,10 +1,13 @@
 from .base import BaseService
 from typing import Dict, Any, List
 
+
 class MailingListService(BaseService):
     """
     Handles MailingList operations.
     """
+
+    _YES_NO = ("Y", "N")
 
     def get_mailinglists(self, mailinglist_name: str = None) -> List[Dict[str, Any]]:
         """
@@ -23,7 +26,7 @@ class MailingListService(BaseService):
         self,
         mailinglist_name: str,
         mailinglist_domain: str,
-        mailinglist_password: str
+        mailinglist_password: str,
     ) -> str:
         """
         Anlegen einer Mailingliste
@@ -31,7 +34,7 @@ class MailingListService(BaseService):
         params = {
             'mailinglist_name': mailinglist_name,
             'mailinglist_domain': mailinglist_domain,
-            'mailinglist_password': mailinglist_password
+            'mailinglist_password': mailinglist_password,
         }
         res = self.client.request('add_mailinglist', params)
         return res.get('ReturnInfo', 'TRUE')
@@ -50,11 +53,19 @@ class MailingListService(BaseService):
         config: str,
         subscriber: str = None,
         restrict_post: str = None,
-        is_active: str = None
+        is_active: str = None,
     ) -> bool:
         """
-        Bearbeiten der Mailingliste
+        Bearbeiten der Mailingliste.
+
+        Raises:
+            ValueError: Bei ungültigem is_active-Wert.
         """
+        if is_active is not None and is_active not in self._YES_NO:
+            raise ValueError(
+                f"is_active must be one of {self._YES_NO}, got '{is_active}'"
+            )
+
         params = {
             'mailinglist_name': mailinglist_name,
             'config': config,
