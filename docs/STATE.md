@@ -22,7 +22,7 @@ an der `assert`-Zeile rot ist, dann eine gemeinsame Maskierung einführen. Kein 
 
 | # | Titel | Datum | Commit |
 |---|-------|-------|--------|
-| I1 | docs_template-Baseline eingeführt (Bestand übernommen) | 2026-10-11 | Hash per Nachtrags-Commit `docs: record I1 commit hash` (BOOTSTRAP Schritt 3) |
+| I1 | docs_template-Baseline eingeführt (Bestand übernommen) | 2026-10-11 | a134265 |
 
 ---
 
