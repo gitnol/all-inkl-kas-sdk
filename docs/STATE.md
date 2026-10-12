@@ -1,7 +1,7 @@
 # Aktueller Projektstatus – all-inkl-kas-sdk
 
-Zuletzt aktualisiert: 2026-10-11
-**Initialisiert mit:** docs_template v27@5ce0f84
+Zuletzt aktualisiert: 2026-10-12
+**Initialisiert mit:** docs_template v27@5ce0f84 → v27@2268889
 **Stack / Overlays:** python-cli / keine
 **Letztes abgeschlossenes Inkrement:** I1 docs_template-Baseline eingeführt (Bestand übernommen) (2026-10-11)
 **Nächster Schritt:** I2 Secrets aus Dry-Run-Log, Export und Debug-Ausgaben fernhalten
