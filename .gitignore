@@ -34,3 +34,14 @@ debug_output.txt
 output/
 kas_export_*.md
 kas_export_*.pdf
+
+# docs_template-Baseline (BOOTSTRAP.md Schritt 1)
+.pytest_cache/
+*.db
+*.pfx
+*.pem
+*.key
+
+# Öffentliches Repo (CONVENTIONS_COMMON.md 3.1): interne Umgebungsdoku und Interna-Denylist nie committen
+/docs/local/
+/.internal-terms
