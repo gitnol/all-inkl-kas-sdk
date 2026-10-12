@@ -32,7 +32,7 @@ steht in `docs/KICKOFF.md` Phase 2 #2, die Gate-Reihenfolge in `docs/CONVENTIONS
   Vor der echten Implementierung muss pytest an einer **scheiternden `assert`-Zeile** rot sein; diesen Output
   zitieren (`../principles/VERIFY_BEFORE_CITE.md`).
 - **Gate-Reihenfolge konkret:** `ruff check` → `ruff format --check` → `mypy` → `pytest` (Aufrufe:
-  `docs/CONVENTIONS.md` §8; Gate 1–3 erst ab I5 eingerichtet); Gate-Zeile im Iterations-Log z. B.
+  `docs/CONVENTIONS.md`, Abschnitt „Quality Gates"; Gate 1–3 erst ab I5 eingerichtet); Gate-Zeile im Iterations-Log z. B.
   `Gate: ruff — (nicht eingerichtet)  mypy — (nicht eingerichtet)  pytest 31 passed ✓`.
 - **Einsatzgrenze:** Das Verhalten der echten KAS-API (Fault-Codes, HTTP-Status, Antwortfelder) ist nicht
   TDD-bar. Orakel sind `readme_KAS_API_SOURCE_OF_TRUTH.md` und dokumentierte bzw. von Menschen aufgezeichnete
