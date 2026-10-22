@@ -164,6 +164,20 @@ Behebt K10. Geschätzt 4 Dateien.
 - [ ] `kas_sdk/utils.get_kas_credentials` bzw. `KasClient` angleichen, Tests mit gepatchtem `keyring`
 - [ ] Docs: `architecture/CONFIGURATION.md`, `README.md` (Credential Management)
 
+### I10: mypy auf `strict = true` anheben
+
+Neue Regel aus docs_template v28 (`CONVENTIONS.md` §2 „mypy streng"); das Projekt nutzt mypy noch gar nicht, I5 führt
+es schrittweise ein. Setzt I5 voraus. Geschätzt 3–5 Dateien je Paketteil; bei > ~400 LOC Diff aufteilen.
+
+**Aufgaben:**
+
+- [ ] `pyproject.toml` → `[tool.mypy]` mit `strict = true`; Lockerungen nur per `[[tool.mypy.overrides]]` je
+      benanntem Modul mit Begründungskommentar (z. B. `keyring`, `tabulate` ohne Typen)
+- [ ] Baseline-Befunde beheben (fehlende Annotationen, implizites `Optional`, `Any`-Rückgaben);
+      `# type: ignore` nur mit Fehlercode
+- [ ] Gate 3 in CI und `tools/git-hooks/pre-commit.local` auf den strikten Lauf umstellen
+- [ ] Docs: `CONVENTIONS.md` §2 (Stand-Hinweis entfernen) und §8
+
 ---
 
 ## Abgeschlossen
