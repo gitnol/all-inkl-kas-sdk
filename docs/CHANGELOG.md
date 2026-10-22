@@ -13,6 +13,27 @@ Die Projekthistorie vor der Doku-Baseline steht nur in `git log` (34 Commits bis
 
 ---
 
+## [2026-10-23] Kadenz-Security-Sweep (vorgezogen, fällig 2026-10-25)
+
+Nur `docs/`, kein Code. Protokoll: `security/DEPENDENCY_AUDIT.md` → „2026-10-23 – Kadenz-Sweep".
+
+### Security
+- `certifi` < 2026.10.19 (transitiv über `requests`) betrifft uns: GHSA-6q48-6c7w-9gw2 (Critical, kompromittierte
+  emSign-Wurzeln, MITM auf die API-Verbindung). `urllib3` < 2.8.0 (drei Advisories vom 2026-09-15, im Init-Sweep
+  nicht erfasst) betrifft Nutzer mit älteren Umgebungen. Neues Inkrement I11 (Untergrenzen), laut
+  Schweregrad-Politik vor I2. `python-dotenv` CVE-2026-28684 betrifft uns nicht (nur `load_dotenv`).
+- `security/THREAT_MODEL.md` Bedrohung 5 ergänzt; Marker „Nächster Security-Sweep" auf 2026-11-06.
+
+### Confidence / Ungeprüft
+- (a) Nicht getestet: `pip-audit` nicht gelaufen (nicht installiert, Installation unterlassen); ersatzweise
+  OSV-Abfrage je lokal installierter Version — erfasst nur die Stichprobe der lokalen Umgebung.
+- (b) Ungeprüft übernommen: Fix-Version von `certifi` (GHSA nennt 2026.10.18, OSV 2026.10.19; Untergrenze daher
+  2026.10.19).
+- (c) Nicht abschließend bewertet: libexpat 2.9.0 (CVE-2026-102633, CVE-2026-77214) — ob CPythons `pyexpat`
+  `XML_ParseBuffer` nutzt, nicht geprüft; beim nächsten Sweep nachholen.
+
+---
+
 ## [2026-10-11] I1 – docs_template-Baseline eingeführt (Bestand übernommen)
 
 Initialisiert mit docs_template v27@5ce0f84, Stack `python-cli` (nur teilweise passend), keine Overlays.

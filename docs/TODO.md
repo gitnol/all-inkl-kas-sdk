@@ -178,6 +178,27 @@ es schrittweise ein. Setzt I5 voraus. Geschätzt 3–5 Dateien je Paketteil; bei
 - [ ] Gate 3 in CI und `tools/git-hooks/pre-commit.local` auf den strikten Lauf umstellen
 - [ ] Docs: `CONVENTIONS.md` §2 (Stand-Hinweis entfernen) und §8
 
+### I11: Untergrenzen für transitive Sicherheitsfixes (`certifi`, `urllib3`)
+
+Aus dem Kadenz-Sweep 2026-10-23 (`security/DEPENDENCY_AUDIT.md`, `security/THREAT_MODEL.md` Bedrohung 5).
+**Severity Critical** (`certifi`, GHSA-6q48-6c7w-9gw2) → laut Schweregrad-Politik vor dem nächsten Code-Inkrement
+(I2) ziehen; steht hier nur nach Sweep-Konvention am Ende. Unabhängig von I6, kann einzeln geliefert werden.
+Geschätzt 4 Dateien.
+
+**Aufgaben:**
+
+- [ ] `pyproject.toml` und `requirements.txt`: `certifi>=2026.10.19` und `urllib3>=2.8.0` als direkte
+      Untergrenzen (mit Kommentar: nur Sicherheits-Floor, keine direkte Nutzung); `python-dotenv>=1.2.2` mitziehen
+- [ ] Test: installierte `certifi`-/`urllib3`-Version erfüllt die Untergrenze aus `pyproject.toml` (liest die
+      Metadaten per `importlib.metadata`, kein Netz) — in einer veralteten Umgebung rot
+- [ ] Docs: `architecture/DEPENDENCIES.md` (transitive Floors, Begründung), `security/DEPENDENCY_AUDIT.md`
+      (Maßnahme erledigt), `security/THREAT_MODEL.md` Bedrohung 5, `docs/STATE.md` (Risiko schließen)
+
+**Zusätzliche DoD:**
+
+- [ ] `pip install -e ".[dev]"` in frischer venv installiert `certifi` ≥ 2026.10.19 und `urllib3` ≥ 2.8.0
+      (Befehl und Ausgabe im CHANGELOG)
+
 ---
 
 ## Abgeschlossen

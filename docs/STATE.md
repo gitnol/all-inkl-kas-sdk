@@ -1,12 +1,12 @@
 # Aktueller Projektstatus – all-inkl-kas-sdk
 
-Zuletzt aktualisiert: 2026-10-22
+Zuletzt aktualisiert: 2026-10-23
 **Initialisiert mit:** docs_template v27@5ce0f84 → v27@2268889 → v28@63b85ec (2026-10-22, Delta-Update)
 **Stack / Overlays:** python-cli / keine
 **Letztes abgeschlossenes Inkrement:** I1 docs_template-Baseline eingeführt (Bestand übernommen) (2026-10-11)
 **Nächster Schritt:** I2 Secrets aus Dry-Run-Log, Export und Debug-Ausgaben fernhalten
 **Nächste Reflexion:** bei Abschluss von I3 (siehe `KICKOFF.md` Phase 1c → `docs/REFLECTION.md` — `docs/`-Drift prüfen + Template-Backport prüfen; danach Marker um 3 erhöhen)
-**Nächster Security-Sweep:** 2026-10-25 (Intervall 14 Tage; siehe `KICKOFF.md` Phase 1 Punkt 4a → `docs/principles/SECURITY_CURRENCY.md` — fällig, sobald heute ≥ diesem Datum; nach dem Sweep Marker = Sweep-Datum + Intervall)
+**Nächster Security-Sweep:** 2026-11-06 (Intervall 14 Tage; siehe `KICKOFF.md` Phase 1 Punkt 4a → `docs/principles/SECURITY_CURRENCY.md` — fällig, sobald heute ≥ diesem Datum; nach dem Sweep Marker = Sweep-Datum + Intervall)
 
 ---
 
@@ -38,6 +38,7 @@ an der `assert`-Zeile rot ist, dann eine gemeinsame Maskierung einführen. Kein 
 | I7 | API-Referenz, README und `.env.example` an den Code angleichen | Mittel |
 | I8 | Source of Truth als Ratchet-Test und nicht existierende Aktionen bereinigen | Niedrig |
 | I9 | Reihenfolge der Zugangsdatenquellen vereinheitlichen | Niedrig |
+| I11 | Untergrenzen für transitive Sicherheitsfixes (`certifi`, `urllib3`) | Hoch (Critical, vor I2 ziehen) |
 
 ---
 
@@ -67,5 +68,6 @@ Wenn keine Risiken bekannt: Zeile „(noch keine Einträge)" einsetzen, Tabelle 
 | KAS-Passwort im Dry-Run-Log (K1) | Generalschlüssel des Accounts kann über Logs abfließen | I2; bis dahin kein `DEBUG`-Logging im Dry-Run | Maintainer | offen |
 | Keine Testumgebung beim Hoster; Agenten dürfen die echte API nicht aufrufen | Annahmen über API-Verhalten (K7, Auth-Typen) bleiben ungeprüft | Orakel = Hoster-Doku + von Menschen aufgezeichnete Antworten; Annahmen im Confidence-Block kennzeichnen | Maintainer | offen |
 | Quality Gates 1–3 fehlen | Lint-/Typfehler bleiben bis I5 unbemerkt | I5; bis dahin Vermerk im Confidence-Block | Maintainer | offen |
+| `certifi` < 2026.10.19 vertraut kompromittierten emSign-Wurzeln (GHSA-6q48-6c7w-9gw2, Critical; Sweep 2026-10-23) | MITM auf die API-Verbindung, KAS-Passwort lesbar | I11 vor I2; Nutzer und lokale Umgebung: `pip install -U certifi` | Maintainer | offen |
 | Python 3.10 EOL am 2026-10-31, 3.9 bereits EOL | Nutzer auf alten Laufzeiten ohne Sicherheitsupdates | I6 (ADR-001) | Maintainer | offen |
 | Advocatus-Diaboli-Hook (`.claude/settings.json`) beim Init nicht angelegt | Gate vor dem Commit nur von Hand | Entscheidung des Maintainers (öffentliches Repo), `BACKLOG.md`; bis dahin KICKOFF Phase 3b Punkt 5 manuell | Maintainer | offen |

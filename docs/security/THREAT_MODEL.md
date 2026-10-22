@@ -97,14 +97,20 @@ CVE-2023-32681 (Proxy-Authorization-Leck, behoben 2.31.0) und CVE-2024-47081 (`.
 Sicherheitsupdates, 3.10 endet am 2026-10-31. CI nutzt Actions per Tag (`@v4`, `@v5`) ohne `permissions:`-Block
 (`.github/workflows/ci.yml`) — Tag-Umschreibung wie beim `tj-actions`-Vorfall 2025 würde fremden Code in CI ausführen;
 CI hat aber keine Secrets.
+Transitive Pakete ohne Untergrenze (Sweep 2026-10-23): `certifi` < 2026.10.19 vertraut emSign-Wurzeln mit
+kompromittierten Zwischen-CA-Schlüsseln (GHSA-6q48-6c7w-9gw2, Critical) — ein damit ausgestelltes Zertifikat für den
+API-Host würde akzeptiert, ein Angreifer im Netzpfad läse den SOAP-Body samt KAS-Passwort; `urllib3` < 2.8.0
+ignoriert unter Umständen die TLS-Konfiguration eines HTTPS-Proxys (CVE-2026-97687).
 
 **Mitigation:**
 - Untergrenze `requests>=2.32.4`, `pip-audit` in CI, Python-Mindestversion anheben (ADR), Actions per SHA pinnen,
   `permissions: contents: read` — I6.
+- Untergrenzen `certifi>=2026.10.19`, `urllib3>=2.8.0` — I11 (Critical, vor I2).
 - Details und Quellen: `docs/security/DEPENDENCY_AUDIT.md`.
 
 **Restrisiko:** Gering – lokal installiert ist `requests` 2.34.2 (nicht betroffen); das Risiko trifft Nutzer mit
-alten Umgebungen.
+alten Umgebungen. Bis I11 mittel für Umgebungen mit `certifi` < 2026.10.19 (lokale Entwicklungsumgebung am
+2026-10-23 betroffen; Nutzern `pip install -U certifi` empfehlen).
 
 ---
 
