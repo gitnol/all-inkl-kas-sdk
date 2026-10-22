@@ -31,6 +31,10 @@ Commit-Pflicht pro Inkrement: `docs/KICKOFF.md` Phase 3b. Stack-spezifisch nur:
 - **Type Hints:** Vollständig für alle Parameter und Rückgabewerte neuer oder geänderter Funktionen. Optionale
   Parameter explizit als `Optional[str] = None` (der Bestand nutzt oft `str = None` — beim Anfassen korrigieren).
   Mindestversion 3.9: kein `X | None` in Laufzeit-Annotationen ohne `from __future__ import annotations`.
+- **mypy streng:** `pyproject.toml` → `[tool.mypy]` mit `strict = true` (Gate 3). Lockerungen nur per
+  `[[tool.mypy.overrides]]` für ein benanntes Modul mit Begründung als Kommentar (z. B. Drittbibliothek ohne Typen);
+  `# type: ignore` nur mit Fehlercode (`# type: ignore[attr-defined]`), nie pauschal. **Stand:** mypy ist noch nicht
+  eingerichtet (§8); Einführung in `docs/TODO.md` I5, Anhebung auf `strict = true` in I10.
 - **Fehlerbehandlung:** SDK-Fehler als Unterklasse von `KasApiError` (`kas_sdk/exceptions.py`) — niemals nackte
   `Exception` werfen. Ungültige Aufruferparameter in Services: `ValueError` mit erlaubten Werten in der Meldung
   (Bestandsmuster). Kein leeres `except:` ohne Logging.

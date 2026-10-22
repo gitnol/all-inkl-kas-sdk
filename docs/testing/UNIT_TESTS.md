@@ -142,6 +142,32 @@ pytest -p no:cacheprovider tests/
 
 Coverage wird noch nicht gemessen (`pytest-cov` nicht in den dev-Abhängigkeiten). Marker sind nicht registriert,
 weil es keine Tests mit Netz/echten Diensten gibt; kommen Live-Tests hinzu, bekommen sie den Marker `live` und
-werden in `pyproject.toml` unter `[tool.pytest.ini_options].markers` registriert.
+werden in `pyproject.toml` unter `[tool.pytest.ini_options].markers` registriert. Kommt Coverage hinzu, gilt
+≥ 80 % der Business-Logik-Funktionen als Richtwert — ein Hinweis auf ungetesteten Code, kein Qualitätsziel.
+
+### Testgüte (Regel: `docs/principles/TEST_EFFECTIVENESS.md`)
+
+- **Mutationsprüfung:** `mutmut run`, danach `mutmut results` bzw. `mutmut browse`. Die zu mutierenden Pfade stehen in
+  `pyproject.toml` unter `[tool.mutmut]`; der Schlüsselname hat sich zwischen mutmut-Versionen geändert — die Doku der
+  eingesetzten Version nehmen. Unter Windows vor dem ersten Lauf prüfen, ob die Version nativ läuft (sonst WSL).
+  Überlebende Mutanten zeigen typischerweise Tests, die nur prüfen, *dass* ein Ergebnis bzw. Befund entsteht, nicht
+  *welcher* (Code, Feldpfad, Grenzwert wie 0/1/Maximum) — dort zuerst nachschärfen. Fallen von `mutmut` 3: Es sucht
+  den Code unter `./src` des Aufrufverzeichnisses (in einem Workspace aus dem Paketordner starten); geänderte Tests
+  bei unverändertem Code bewertet es nicht neu (nach Teständerungen frisch laufen lassen); Tests laufen in der Kopie
+  `mutants/`, feste `Path(__file__).parents[n]`-Pfade brechen dort — die Projektwurzel über eine Marker-Datei suchen.
+  Projektbezug: flaches Layout ohne `src/` — die Pfade (`kas_sdk/`) deshalb ausdrücklich unter `[tool.mutmut]`
+  eintragen.
+- **Eigenschaftstests:** Hypothesis. Gefundene Gegenbeispiele zusätzlich mit `@example(...)` festschreiben.
+  ```python
+  from hypothesis import example, given, strategies as st
+
+  @given(st.text())
+  @example("")
+  def test_roundtrip(text: str) -> None:
+      assert parse(serialisiere(text)) == text
+  ```
+
+**Stand:** Weder `mutmut` noch `hypothesis` stehen in den dev-Abhängigkeiten; Mutationsprüfung bisher nur von Hand
+(`docs/KICKOFF.md` Phase 2, Charakterisierungstests).
 
 Stand bei Init (2026-10-11, lokal, Python 3.13): `31 passed`.
