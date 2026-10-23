@@ -23,7 +23,7 @@ an der `assert`-Zeile rot ist, dann eine gemeinsame Maskierung einführen. Kein 
 | # | Titel | Datum | Commit |
 |---|-------|-------|--------|
 | I1 | docs_template-Baseline eingeführt (Bestand übernommen) | 2026-10-11 | a134265 |
-| I11 | Untergrenzen für transitive Sicherheitsfixes (`certifi`, `urllib3`) | 2026-10-23 | HASH_I11 |
+| I11 | Untergrenzen für transitive Sicherheitsfixes (`certifi`, `urllib3`) | 2026-10-23 | cff15eb |
 
 ---
 
