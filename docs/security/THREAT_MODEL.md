@@ -105,12 +105,14 @@ ignoriert unter Umständen die TLS-Konfiguration eines HTTPS-Proxys (CVE-2026-97
 **Mitigation:**
 - Untergrenze `requests>=2.32.4`, `pip-audit` in CI, Python-Mindestversion anheben (ADR), Actions per SHA pinnen,
   `permissions: contents: read` — I6.
-- Untergrenzen `certifi>=2026.10.19`, `urllib3>=2.8.0` — I11 (Critical, vor I2).
+- Untergrenzen `certifi>=2026.10.19` und — nur Python ≥ 3.10 — `urllib3>=2.8.0`, `python-dotenv>=1.2.2`,
+  geprüft von `tests/test_dependency_floors.py` — umgesetzt in I11 (2026-10-23).
 - Details und Quellen: `docs/security/DEPENDENCY_AUDIT.md`.
 
 **Restrisiko:** Gering – lokal installiert ist `requests` 2.34.2 (nicht betroffen); das Risiko trifft Nutzer mit
-alten Umgebungen. Bis I11 mittel für Umgebungen mit `certifi` < 2026.10.19 (lokale Entwicklungsumgebung am
-2026-10-23 betroffen; Nutzern `pip install -U certifi` empfehlen).
+alten Umgebungen. Neuinstallationen ziehen seit I11 `certifi` ≥ 2026.10.19; eine bestehende Umgebung bleibt auf dem
+alten Bündel, bis sie neu installiert oder `pip install -U certifi` ausgeführt wird. Unter Python 3.9 gibt es keine
+`urllib3`-Version mit den Fixes von 2.8.0 (verlangt Python ≥ 3.10) — erledigt sich mit der Mindestversion aus I6.
 
 ---
 

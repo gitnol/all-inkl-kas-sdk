@@ -81,6 +81,13 @@ mitziehen (Low, I11); lokale Entwicklungsumgebung: `certifi` und CPython (3.13.1
 außerhalb des Repos); `pip-audit` weiterhin offen (I6); libexpat 2.9.0 bzw. `XML_ParseBuffer`-Nutzung in CPython
 beim nächsten Sweep nachprüfen.
 
+**Umgesetzt 2026-10-23 (I11):** Untergrenzen `certifi>=2026.10.19` (alle Python-Versionen),
+`urllib3>=2.8.0` und `python-dotenv>=1.2.2` (beide nur Python ≥ 3.10) in `pyproject.toml` und `requirements.txt`;
+Test `tests/test_dependency_floors.py`. Frische venv (Python 3.13) installiert `certifi` 2026.10.19 und `urllib3`
+2.8.0. **Rest:** Die Fix-Versionen von `urllib3` und `python-dotenv` verlangen Python ≥ 3.10 (PyPI
+`requires_python`); unter Python 3.9 werden `urllib3` 2.6.3 und `python-dotenv` 1.2.1 aufgelöst (`uv pip compile`) — die drei
+`urllib3`-Advisories bleiben dort offen, bis I6 (ADR-001) die Mindestversion anhebt. `certifi` wirkt auch unter 3.9.
+
 ### 2026-10-11 – Init-Sweep
 
 | Datum | Quelle (Scanner / URL) | Paket / Version | Befund | betrifft uns? (Begründung) | Maßnahme / Restrisiko |

@@ -12,13 +12,21 @@ dependencies = [
     "requests>=2.0.0",
     "keyring>=25.0.0",
     "tabulate>=0.9.0",
-    "python-dotenv>=1.0.0",
+    # python-dotenv: security floor 1.2.2 (CVE-2026-28684) needs Python >= 3.10
+    'python-dotenv>=1.0.0; python_version < "3.10"',
+    'python-dotenv>=1.2.2; python_version >= "3.10"',
+    # Security floors only, no direct use (transitive via requests):
+    # certifi GHSA-6q48-6c7w-9gw2; urllib3 2.8.0 fixes (needs Python >= 3.10)
+    "certifi>=2026.10.19",
+    'urllib3>=2.8.0; python_version >= "3.10"',
 ]
 
 [project.optional-dependencies]
 dev = [
     "pytest>=7.0",
     "beautifulsoup4>=4.12.0",
+    "packaging>=22.0",
+    'tomli>=1.1.0; python_version < "3.11"',
 ]
 
 [tool.setuptools.packages.find]

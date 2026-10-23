@@ -12,7 +12,8 @@ Neue Tests dürfen pytest-Stil (Funktionen, `monkeypatch`, `caplog`) nutzen.
   ```
   tests/
   ├── test_payloads.py      # Request-Aufbau: gesendetes SOAP-XML → JSON-Payload → Parameter
-  └── test_integration.py   # Parsing realistischer SOAP-Antworten, Exceptions, Dry-Run, Account-Validierung
+  ├── test_integration.py   # Parsing realistischer SOAP-Antworten, Exceptions, Dry-Run, Account-Validierung
+  └── test_dependency_floors.py  # Sicherheits-Floors: installierte Versionen ≥ Untergrenzen aus pyproject.toml
   ```
 - Jeder Test läuft ohne Netz: `kas_sdk.client.requests.post` wird gepatcht oder `dry_run=True` gesetzt.
   **Kein Test ruft die echte KAS-API auf** — es gibt keine Testumgebung beim Hoster.

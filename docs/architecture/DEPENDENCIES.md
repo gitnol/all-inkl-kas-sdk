@@ -13,7 +13,24 @@ Sicherheitsbewertung: `docs/security/DEPENDENCY_AUDIT.md`.
 | `requests` | `≥ 2.0.0` (geplant `≥ 2.32.4`, I6) | HTTPS-POST an die SOAP-API (`kas_sdk/client.py`) | SDK funktionslos — einziger Transport |
 | `keyring` | `≥ 25.0.0` | Passwort aus dem System-Keyring (Client: optional per `import` im `try`; `kas_sdk/utils.py`: Pflicht-Import) | Client: Warnung, Passwort muss per Argument/Env kommen; Skripte über `utils`: Import-Fehler |
 | `tabulate` | `≥ 0.9.0` | Tabellenausgabe in Skripten und im Export (`kas_sdk/utils.py`, `scripts/*.py`) | Skripte brechen beim Import ab; die Bibliothek selbst nicht |
-| `python-dotenv` | `≥ 1.0.0` | lädt `.env` beim Import von `kas_sdk.client` | still übersprungen (`ImportError` wird ignoriert); Werte müssen in der Umgebung stehen |
+| `python-dotenv` | `≥ 1.2.2` ab Python 3.10, sonst `≥ 1.0.0` (I11) | lädt `.env` beim Import von `kas_sdk.client` | still übersprungen (`ImportError` wird ignoriert); Werte müssen in der Umgebung stehen |
+
+### Sicherheits-Floors für transitive Pakete
+
+Direkt eingetragen, aber **nicht direkt genutzt** — sie kommen über `requests` und stehen nur in `pyproject.toml`
+und `requirements.txt`, damit pip keine Version mit bekannter Lücke installiert (I11, Sweep 2026-10-23,
+`docs/security/DEPENDENCY_AUDIT.md`). `requests` selbst verlangt nur `certifi>=2023.5.7` und `urllib3>=1.26`.
+
+| Paket | Untergrenze | Grund | Gilt für |
+|-------|-------------|-------|----------|
+| `certifi` | `≥ 2026.10.19` | GHSA-6q48-6c7w-9gw2 (Critical): kompromittierte emSign-Wurzeln entfernt; `requests` prüft das TLS-Zertifikat der KAS-API gegen dieses Bündel | alle Python-Versionen |
+| `urllib3` | `≥ 2.8.0` | CVE-2026-97687 (HTTPS-Proxy-TLS), CVE-2026-97689, CVE-2026-97688 | nur Python ≥ 3.10 (Marker) — 2.8.0 verlangt Python ≥ 3.10; unter 3.9 wird `urllib3` 2.6.3 aufgelöst (`uv pip compile --python-version 3.9`), ohne diese Fixes (I6, ADR-001) |
+| `python-dotenv` | `≥ 1.2.2` | CVE-2026-28684 (betrifft das SDK nicht, nur mitgezogen) | nur Python ≥ 3.10 (Marker), unter 3.9 bleibt `≥ 1.0.0` |
+
+Prüfung ohne Netz: `tests/test_dependency_floors.py` vergleicht die installierten Versionen
+(`importlib.metadata`) mit den Untergrenzen aus `pyproject.toml` und prüft, dass `requirements.txt` dieselben
+Einträge führt. Eine veraltete Umgebung macht den Test rot. Einen Floor erst entfernen, wenn `requests` ihn selbst
+verlangt.
 
 ### Optionale pip-Pakete
 
@@ -28,6 +45,8 @@ Sicherheitsbewertung: `docs/security/DEPENDENCY_AUDIT.md`.
 | Paket | Zweck |
 |-------|-------|
 | `pytest` (`≥ 7.0`, Extra `dev`) | Test-Runner (Tests sind `unittest.TestCase`-Klassen, laufen unter pytest) |
+| `packaging` (`≥ 22.0`, Extra `dev`) | Requirement-, Marker- und Versionsvergleich in `tests/test_dependency_floors.py` (I11) |
+| `tomli` (`≥ 1.1.0`, Extra `dev`, nur Python < 3.11) | liest `pyproject.toml` im selben Test, wo `tomllib` fehlt (I11) |
 | `ruff`, `mypy` | Gate 1–3 — **noch nicht** eingetragen, Einführung `docs/TODO.md` I5 |
 | `pip-audit` | Dependency-Scan — **noch nicht** eingetragen, Einführung `docs/TODO.md` I6 |
 

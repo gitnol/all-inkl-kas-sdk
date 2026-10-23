@@ -22,6 +22,21 @@ billiger und belastbarer als Lesen, und als Test wiederverwendbar (Ratchet: Anza
 
 ---
 
+## L2: Sicherheits-Floor gegen die Laufzeit-Untergrenze der Fix-Version prüfen
+- Inkrement: I11
+- Scope: generisch-base
+- Backport-Ziel: `base/principles/SECURITY_CURRENCY.md` (Abschnitt „Durchführung", neuer Punkt zur Maßnahme)
+- Status: offen
+
+Ein Advisory nennt die Fix-Version, aber nicht, welche Laufzeit sie verlangt. `urllib3` 2.8.0 und `python-dotenv`
+1.2.2 setzen Python ≥ 3.10 voraus, das Projekt erlaubt 3.9: ein schlichtes `urllib3>=2.8.0` hätte die Installation
+unter 3.9 (CI-Matrix) unauflösbar gemacht. Vorher die Metadaten der Fix-Version lesen (PyPI JSON
+`requires_python`, npm `engines`, NuGet-Zielframeworks); passt sie nicht, den Floor per Umgebungsmarker auf die
+passenden Laufzeiten beschränken und die Lücke auf der alten Laufzeit als Restrisiko führen — oder die
+Mindestversion anheben (ADR).
+
+---
+
 ## Pflege
 
 - Neuer „Lessons Learned"-Block im `CHANGELOG.md` → Eintrag `## L<N>:` hier anlegen.

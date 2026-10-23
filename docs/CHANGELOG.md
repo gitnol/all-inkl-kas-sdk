@@ -13,6 +13,85 @@ Die Projekthistorie vor der Doku-Baseline steht nur in `git log` (34 Commits bis
 
 ---
 
+## [2026-10-23] I11 – Untergrenzen für transitive Sicherheitsfixes (`certifi`, `urllib3`)
+
+Aus dem Kadenz-Sweep 2026-10-23 (Critical, vor I2 gezogen). Phase 1 Punkt 2a: Überschneidung mit I6 (gleiche
+Dateien `pyproject.toml`/`requirements.txt`, gleiche Bedrohung 5) bewusst **getrennt gelassen** — I6 braucht die
+ADR zur Python-Mindestversion, I11 sollte als Critical-Fix sofort und ohne diese Entscheidung kommen.
+
+### Security
+- `pyproject.toml` und `requirements.txt`: `certifi>=2026.10.19` (alle Python-Versionen), `urllib3>=2.8.0` und
+  `python-dotenv>=1.2.2` (je mit Marker `python_version >= "3.10"`), Kommentar „nur Sicherheits-Floor". Werte gegen
+  PyPI JSON geprüft (2026-10-23): alle drei Versionen veröffentlicht, nicht zurückgezogen.
+- **Abweichung vom Plan:** `urllib3` 2.8.0 und `python-dotenv` 1.2.2 verlangen laut PyPI `requires_python` Python
+  ≥ 3.10; ohne Marker wäre das Paket unter 3.9 (CI-Matrix, `requires-python >=3.9`) nicht installierbar. Unter 3.9
+  bleibt `python-dotenv>=1.0.0`, `urllib3` ohne Floor (aufgelöst 2.6.3) — Rest als Aufgabe in I6.
+
+### Added
+- `tests/test_dependency_floors.py`: liest die Floors aus `pyproject.toml` (`tomllib`, unter 3.11 `tomli`),
+  wertet Marker aus und vergleicht mit `importlib.metadata.version()`; prüft, dass `requirements.txt` dieselben
+  Einträge führt. Kein Netz.
+- Extra `dev`: `packaging>=22.0`, `tomli>=1.1.0; python_version < "3.11"` (nur für diesen Test).
+
+### Changed
+- `docs/architecture/DEPENDENCIES.md` (Abschnitt „Sicherheits-Floors für transitive Pakete", dev-Pakete),
+  `docs/security/DEPENDENCY_AUDIT.md` (Maßnahme umgesetzt, Rest Python 3.9), `docs/security/THREAT_MODEL.md`
+  Bedrohung 5, `docs/testing/UNIT_TESTS.md` (Testdatei), `docs/STATE.md` (Risiko `certifi` geschlossen, Kennzahl
+  Tests), `docs/TODO.md` (I11 entfernt, Rest in I6).
+
+### Nachweis
+```
+ITERATION 1 — I11 Sicherheits-Floors
+Ziel:         veraltete Umgebung (certifi < 2026.10.19) fällt im Test auf
+RED-Beweis:   Wegwerf-venv (Python 3.13.14) mit `pip install -e ".[dev]" "certifi==2026.7.22"`
+              a) vor der Manifest-Änderung: 6 failed, u. a.
+                 AssertionError: unexpectedly None : certifi has no entry in [project].dependencies
+              b) nach der Manifest-Änderung, ohne Neuinstallation:
+                 AssertionError: <Version('2026.7.22')> not greater than or equal to <Version('2026.10.19')> :
+                 certifi 2026.7.22 is below the security floor 2026.10.19
+                 1 failed, 3 passed, 8 subtests passed
+GREEN-Beweis: `pip install -e ".[dev]"` in derselben venv → certifi 2026.10.19;
+              pytest -p no:cacheprovider tests/ → 34 passed, 9 subtests passed
+Gate:         ruff check ✓, ruff format --check ✓, mypy ✓ (nur neue Testdatei, per uvx — Projekt-Gates 1–3 erst
+              mit I5); pytest 34 passed ✓
+```
+
+DoD — frische venv (Python 3.13.14, Scratch-Ordner außerhalb des Repos):
+```
+$ python -m venv <scratch>/allinkl_venv_dod
+$ <scratch>/allinkl_venv_dod/Scripts/python.exe -m pip install -e ".[dev]"
+Successfully installed beautifulsoup4-4.15.0 certifi-2026.10.19 charset_normalizer-3.5.2 colorama-0.4.6
+idna-3.20 iniconfig-2.3.1 jaraco.classes-3.4.0 jaraco.context-6.1.2 jaraco.functools-4.6.0 kas-sdk-1.0.0
+keyring-25.7.0 more-itertools-11.2.1 packaging-26.3 pluggy-1.7.0 pygments-2.21.0 pytest-9.1.1
+python-dotenv-1.2.4 pywin32-ctypes-0.2.3 requests-2.34.2 soupsieve-3.0.4 tabulate-0.10.0
+typing-extensions-4.16.0 urllib3-2.8.0
+$ python -c "…importlib.metadata.version…"
+certifi 2026.10.19 | urllib3 2.8.0 | python-dotenv 1.2.4
+```
+
+Auflösung je Python-Version ohne Installation (`uv pip compile pyproject.toml --extra dev --python-version X`):
+3.9 → certifi 2026.10.19, urllib3 2.6.3, python-dotenv 1.2.1, tomli 2.5.0; 3.10 → certifi 2026.10.19,
+urllib3 2.8.0, python-dotenv 1.2.4; 3.11 → wie 3.10 ohne tomli.
+
+### Confidence / Ungeprüft
+- (a) Nicht getestet: Testlauf unter Python 3.9/3.10/3.11 (lokal nur 3.13) — für 3.9 nur die Auflösung per
+  `uv pip compile` und die Marker-Auswahl per `Marker.evaluate({"python_version": "3.9"})` geprüft; den echten
+  Lauf liefert erst die CI-Matrix nach dem Push. Projekt-Gates 1–3 (ruff, mypy) gibt es noch nicht (I5); nur die
+  neue Testdatei per `uvx` geprüft. `pip-audit` weiterhin nicht gelaufen (I6).
+- (b) Ungeprüft übernommen: Fix-Versionen und Advisory-Inhalte aus dem Sweep (`security/DEPENDENCY_AUDIT.md`);
+  `packaging`/`tomli` als dev-Pakete statt Eigenbau — `packaging` kommt ohnehin mit `pytest`.
+- (c) Ohne vollständiges Lesen geändert: `docs/security/THREAT_MODEL.md` (nur Bedrohung 5),
+  `docs/testing/UNIT_TESTS.md` (nur Abschnitt 1).
+- Bestehende Umgebungen (auch die lokale Entwicklungsumgebung) bleiben auf dem alten `certifi`, bis sie neu
+  installiert werden — der Test macht das sichtbar, behebt es aber nicht.
+
+### Lessons Learned
+- Vor dem Eintragen eines Sicherheits-Floors die `requires_python` der Fix-Version gegen die unterstützten
+  Python-Versionen des Projekts prüfen (PyPI JSON) — sonst bricht die Installation auf der ältesten Laufzeit
+  (`LESSONS_LEARNED.md` L2).
+
+---
+
 ## [2026-10-23] Kadenz-Security-Sweep (vorgezogen, fällig 2026-10-25)
 
 Nur `docs/`, kein Code. Protokoll: `security/DEPENDENCY_AUDIT.md` → „2026-10-23 – Kadenz-Sweep".
