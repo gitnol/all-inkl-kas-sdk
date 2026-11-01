@@ -26,7 +26,7 @@ billiger und belastbarer als Lesen, und als Test wiederverwendbar (Ratchet: Anza
 - Inkrement: I11
 - Scope: generisch-base
 - Backport-Ziel: `base/principles/SECURITY_CURRENCY.md` (Abschnitt „Durchführung", neuer Punkt zur Maßnahme)
-- Status: offen
+- Status: backported v32@e8eaf0f
 
 Ein Advisory nennt die Fix-Version, aber nicht, welche Laufzeit sie verlangt. `urllib3` 2.8.0 und `python-dotenv`
 1.2.2 setzen Python ≥ 3.10 voraus, das Projekt erlaubt 3.9: ein schlichtes `urllib3>=2.8.0` hätte die Installation
