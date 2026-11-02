@@ -41,7 +41,7 @@ Mindestversion anheben (ADR).
 - Inkrement: I12
 - Scope: generisch-base
 - Backport-Ziel: `base/principles/SECURITY_CURRENCY.md` (Schweregrad-Politik, Punkt Laufzeit-Lebenszyklus)
-- Status: offen
+- Status: backported unreleased@f4f5449 (Branch `backport/all-inkl-laufzeit-ci`, ab v33; Tag folgt)
 
 Der Init-Sweep (2026-10-11) fand das Ende von Python 3.9/3.10 und plante die Anhebung als I6 mit Priorität
 „Mittel“ hinter vier anderen Inkrementen — Begründung „die Laufzeit wählt der Nutzer“. Drei Wochen später war 3.10
@@ -56,7 +56,7 @@ eingeplant, nicht „irgendwann“.
 - Inkrement: I12
 - Scope: generisch-base
 - Backport-Ziel: `base/principles/SECURITY_CURRENCY.md` (Prüfgegenstände, CI-Umgebung)
-- Status: offen
+- Status: backported unreleased@f4f5449 (Branch `backport/all-inkl-laufzeit-ci`, ab v33; Tag folgt)
 
 Der Sweep prüfte Pakete, Laufzeit und Actions-Advisories, aber nicht die CI-Umgebung selbst. GitHub hatte
 angekündigt, `ubuntu-latest` ab 2026-10-19 auf Ubuntu 26.04 umzustellen; dort gibt es kein Python 3.9 mehr, der
