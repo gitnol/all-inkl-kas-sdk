@@ -37,6 +37,36 @@ Mindestversion anheben (ADR).
 
 ---
 
+## L3: Abgelaufene Laufzeit im Sweep nicht als „Mittel“ parken
+- Inkrement: I12
+- Scope: generisch-base
+- Backport-Ziel: `base/principles/SECURITY_CURRENCY.md` (Schweregrad-Politik, Punkt Laufzeit-Lebenszyklus)
+- Status: offen
+
+Der Init-Sweep (2026-10-11) fand das Ende von Python 3.9/3.10 und plante die Anhebung als I6 mit Priorität
+„Mittel“ hinter vier anderen Inkrementen — Begründung „die Laufzeit wählt der Nutzer“. Drei Wochen später war 3.10
+ebenfalls abgelaufen, und die CI brach, weil der Runner 3.9 nicht mehr anbot. Eine zulässige Laufzeit ohne
+Sicherheitsupdates ist keine Härtung, sondern ein offener Befund mit Datum: Ist das EOL erreicht, gilt sie wie ein
+High-Befund (vor dem nächsten Code-Inkrement); steht das EOL bis zum nächsten Sweep an, wird die Anhebung jetzt
+eingeplant, nicht „irgendwann“.
+
+---
+
+## L4: Angekündigte Runner- und Image-Wechsel gehören in den Sweep
+- Inkrement: I12
+- Scope: generisch-base
+- Backport-Ziel: `base/principles/SECURITY_CURRENCY.md` (Prüfgegenstände, CI-Umgebung)
+- Status: offen
+
+Der Sweep prüfte Pakete, Laufzeit und Actions-Advisories, aber nicht die CI-Umgebung selbst. GitHub hatte
+angekündigt, `ubuntu-latest` ab 2026-10-19 auf Ubuntu 26.04 umzustellen; dort gibt es kein Python 3.9 mehr, der
+nächste Push war rot (2026-11-02). Gleiches gilt für Node-Laufzeiten von Actions (`checkout@v4`, `setup-python@v5`
+auf Node 20) und Basis-Images (`python:X.Y`, `mcr.microsoft.com/...`). Im Sweep die Ankündigungen der
+CI-Plattform (Runner-Images, deprecated Labels, Action-Laufzeiten) abfragen und gegen Matrix, `runs-on` und
+`image:` halten; bewusste Festlegungen (`ubuntu-24.04`) mit Grund und Ablaufdatum führen.
+
+---
+
 ## Pflege
 
 - Neuer „Lessons Learned"-Block im `CHANGELOG.md` → Eintrag `## L<N>:` hier anlegen.

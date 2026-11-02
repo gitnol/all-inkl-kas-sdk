@@ -41,6 +41,10 @@ DoD:         je frische venv (uv), pip install -e ".[dev]", pytest -p no:cachepr
              Python 3.11 -> 36 passed, 11 subtests; Python 3.15 -> 36 passed, 11 subtests
 ```
 
+### Lessons Learned
+- Abgelaufene Laufzeit nicht als „Mittel“ parken, sondern ab EOL wie einen High-Befund behandeln (L3).
+- Angekündigte Runner- und Image-Wechsel der CI-Plattform gehören in den Sweep (L4).
+
 ---
 
 ## [2026-10-23] I11 – Untergrenzen für transitive Sicherheitsfixes (`certifi`, `urllib3`)
