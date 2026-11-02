@@ -9,11 +9,11 @@ Wartungsskripte, die das SDK nutzen. Das SDK ist eine Bibliothek ohne eigenen Se
 
 | Schicht | Technologie |
 |---------|-------------|
-| Bibliothek (`kas_sdk/`) | Python ≥ 3.9 (laut `pyproject.toml`), `requests` (HTTP), `xml.etree.ElementTree` (Antwort-Parsing), `json` (Request-Payload) |
+| Bibliothek (`kas_sdk/`) | Python ≥ 3.11 (laut `pyproject.toml`, ADR-001), `requests` (HTTP), `xml.etree.ElementTree` (Antwort-Parsing), `json` (Request-Payload) |
 | Wartungsskripte (`scripts/`, `debug/`, `example_usage.py`) | Python, `argparse`, `tabulate`; Zugangsdaten über `kas_sdk.utils` (Keyring/Env/interaktiv) |
 | Datenbank | keine |
 | Auth | KAS-Login + Passwort je Request (`kas_auth_type="plain"`, alternativ `sha1`); Quelle: Argument, Env, System-Keyring — Details `docs/security/AUTHENTICATION.md` |
-| Build | `setuptools` (`pyproject.toml`), Installation `pip install -e .`; CI: GitHub Actions, `pytest` auf Python 3.9 / 3.11 / 3.13 |
+| Build | `setuptools` (`pyproject.toml`), Installation `pip install -e .`; CI: GitHub Actions, `pytest` auf Python 3.11 / 3.13 / 3.15 (`ubuntu-26.04`) |
 
 ---
 
@@ -89,7 +89,7 @@ tests/*.py               → Offline-Tests mit gemocktem requests.post und XML-F
 | Zugangsdaten werden bei jedem Request mitgeschickt (`kas_auth_data`) | Passwort liegt im Prozessspeicher und in jedem Request-Body; jedes Log des Bodys ist ein Secret-Leck (`docs/security/THREAT_MODEL.md` Bedrohung 1) |
 | SOAP-Antworten sind generische `item/key/value`-Maps | Parser rät per Heuristik Liste vs. Dict (Schlüssel `0..N`); Rückgabetypen sind nicht statisch typisiert |
 | Öffentliches Repository, MIT-Lizenz | keine Interna in Code/Doku/Commits (`docs/CONVENTIONS_COMMON.md` 3.1); lokale Umgebungsdetails nur in `docs/local/` |
-| Python-Mindestversion 3.9 (End of Life seit 2025-10-31) | Anhebung ist offen (`docs/TODO.md`), CI-Matrix 3.9/3.11/3.13 |
+| Python-Mindestversion 3.11 (Sicherheitsupdates bis 2027-10) | ADR-001; vor 2027-10 erneut anheben |
 
 ---
 

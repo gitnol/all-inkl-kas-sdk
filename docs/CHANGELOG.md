@@ -13,6 +13,36 @@ Die Projekthistorie vor der Doku-Baseline steht nur in `git log` (34 Commits bis
 
 ---
 
+## [2026-11-02] I12 – Python-Mindestversion 3.11, Ziel 3.15 (ADR-001)
+
+Aus I6 herausgelöst (Phase 1 Punkt 2a): Der CI-Lauf vom 2026-11-02 scheiterte, weil `ubuntu-latest` jetzt Ubuntu
+26.04 ist und `actions/setup-python` dort kein Python 3.9 anbietet. Übergangs-Fix davor: Runner auf `ubuntu-24.04`,
+`actions/checkout@v5`, `actions/setup-python@v6` (`b1e5ee5`). Die übrigen I6-Aufgaben bleiben in I6.
+
+### Changed
+- `pyproject.toml`: `requires-python = ">=3.11"`; Marker an `urllib3>=2.8.0` und `python-dotenv>=1.2.2` entfernt
+  (gelten jetzt für jede zulässige Laufzeit); dev-Extra ohne `tomli`. `requirements.txt` gleichgezogen.
+- `.github/workflows/ci.yml`: Runner `ubuntu-26.04`, Matrix 3.11/3.13/3.15.
+- `tests/test_dependency_floors.py`: `tomllib` direkt; neue Klasse `TestMinimumPython` prüft `requires-python`
+  (3.11 erlaubt, 3.10 nicht) und dass `pyproject.toml`/`requirements.txt` keine `python_version`-Marker führen.
+- Docs: `docs/architecture/ADR/ADR-001-python-mindestversion.md` (neu), `CONVENTIONS.md` (Stack, `X | None`
+  erlaubt), `KICKOFF.md`, `architecture/DEPENDENCIES.md`, `architecture/OVERVIEW.md`, `operations/DEPLOYMENT.md`,
+  `operations/RUNBOOK.md`, `operations/SETUP.md`, `security/DEPENDENCY_AUDIT.md`, `security/THREAT_MODEL.md`
+  Bedrohung 5, `STATE.md`, `TODO.md` (I6 gekürzt).
+
+### Security
+- Unter jeder zulässigen Laufzeit greifen jetzt die `urllib3`-Fixes aus 2.8.0; Laufzeiten ohne
+  Sicherheitsupdates (3.9, 3.10) sind ausgeschlossen. **Inkompatibel** für Nutzer mit Python 3.9/3.10.
+
+```
+RED-Beweis:  pytest tests/test_dependency_floors.py (Python 3.13, vor der Änderung)
+             -> 3 failed: Version 3.10.99 in SpecifierSet('>=3.9'); python_version in beiden Dateien
+DoD:         je frische venv (uv), pip install -e ".[dev]", pytest -p no:cacheprovider tests/
+             Python 3.11 -> 36 passed, 11 subtests; Python 3.15 -> 36 passed, 11 subtests
+```
+
+---
+
 ## [2026-10-23] I11 – Untergrenzen für transitive Sicherheitsfixes (`certifi`, `urllib3`)
 
 Aus dem Kadenz-Sweep 2026-10-23 (Critical, vor I2 gezogen). Phase 1 Punkt 2a: Überschneidung mit I6 (gleiche

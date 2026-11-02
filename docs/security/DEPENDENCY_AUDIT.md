@@ -88,6 +88,9 @@ Test `tests/test_dependency_floors.py`. Frische venv (Python 3.13) installiert `
 `requires_python`); unter Python 3.9 werden `urllib3` 2.6.3 und `python-dotenv` 1.2.1 aufgelöst (`uv pip compile`) — die drei
 `urllib3`-Advisories bleiben dort offen, bis I6 (ADR-001) die Mindestversion anhebt. `certifi` wirkt auch unter 3.9.
 
+**Umgesetzt 2026-11-02 (I12, ADR-001):** `requires-python >=3.11`, Marker an den Floors entfernt; CI 3.11/3.13/3.15
+auf `ubuntu-26.04`. Damit ist der Rest aus I11 erledigt.
+
 ### 2026-10-11 – Init-Sweep
 
 | Datum | Quelle (Scanner / URL) | Paket / Version | Befund | betrifft uns? (Begründung) | Maßnahme / Restrisiko |

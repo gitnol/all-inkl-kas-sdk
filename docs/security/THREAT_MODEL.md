@@ -93,8 +93,8 @@ A-Record angelegt und die Auflösung bricht nach dem Löschen. Integritäts-/Ver
 
 **Gefahr:** `pyproject.toml`/`requirements.txt` erlauben `requests>=2.0.0` — damit auch Versionen mit
 CVE-2023-32681 (Proxy-Authorization-Leck, behoben 2.31.0) und CVE-2024-47081 (`.netrc`-Credential-Leck, behoben
-2.32.4). Kein Lockfile, kein `pip-audit`-Lauf in CI. `requires-python >=3.9`: Python 3.9 ist seit 2025-10-31 ohne
-Sicherheitsupdates, 3.10 endet am 2026-10-31. CI nutzt Actions per Tag (`@v4`, `@v5`) ohne `permissions:`-Block
+2.32.4). Kein Lockfile, kein `pip-audit`-Lauf in CI. Bis I12 erlaubte `requires-python >=3.9` Laufzeiten ohne
+Sicherheitsupdates (3.9 seit 2025-10-31, 3.10 seit 2026-10-31). CI nutzt Actions per Tag (`@v4`, `@v5`) ohne `permissions:`-Block
 (`.github/workflows/ci.yml`) — Tag-Umschreibung wie beim `tj-actions`-Vorfall 2025 würde fremden Code in CI ausführen;
 CI hat aber keine Secrets.
 Transitive Pakete ohne Untergrenze (Sweep 2026-10-23): `certifi` < 2026.10.19 vertraut emSign-Wurzeln mit
@@ -103,16 +103,16 @@ API-Host würde akzeptiert, ein Angreifer im Netzpfad läse den SOAP-Body samt K
 ignoriert unter Umständen die TLS-Konfiguration eines HTTPS-Proxys (CVE-2026-97687).
 
 **Mitigation:**
-- Untergrenze `requests>=2.32.4`, `pip-audit` in CI, Python-Mindestversion anheben (ADR), Actions per SHA pinnen,
-  `permissions: contents: read` — I6.
-- Untergrenzen `certifi>=2026.10.19` und — nur Python ≥ 3.10 — `urllib3>=2.8.0`, `python-dotenv>=1.2.2`,
+- Untergrenze `requests>=2.32.4`, `pip-audit` in CI, Actions per SHA pinnen, `permissions: contents: read` — I6.
+- Python-Mindestversion 3.11 (ADR-001) — umgesetzt in I12 (2026-11-02).
+- Untergrenzen `certifi>=2026.10.19`, `urllib3>=2.8.0`, `python-dotenv>=1.2.2` (Marker seit I12 entfallen),
   geprüft von `tests/test_dependency_floors.py` — umgesetzt in I11 (2026-10-23).
 - Details und Quellen: `docs/security/DEPENDENCY_AUDIT.md`.
 
 **Restrisiko:** Gering – lokal installiert ist `requests` 2.34.2 (nicht betroffen); das Risiko trifft Nutzer mit
 alten Umgebungen. Neuinstallationen ziehen seit I11 `certifi` ≥ 2026.10.19; eine bestehende Umgebung bleibt auf dem
-alten Bündel, bis sie neu installiert oder `pip install -U certifi` ausgeführt wird. Unter Python 3.9 gibt es keine
-`urllib3`-Version mit den Fixes von 2.8.0 (verlangt Python ≥ 3.10) — erledigt sich mit der Mindestversion aus I6.
+alten Bündel, bis sie neu installiert oder `pip install -U certifi` ausgeführt wird. Seit I12 (`requires-python >=3.11`)
+greifen alle Floors unter jeder zulässigen Laufzeit.
 
 ---
 

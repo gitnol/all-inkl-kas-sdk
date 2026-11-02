@@ -1,7 +1,7 @@
 # KICKOFF – all-inkl-kas-sdk Agent Session
 
 Projekt: all-inkl-kas-sdk – Python-SDK für die SOAP-API des All-Inkl-KAS (Webhosting-Verwaltung) plus Wartungsskripte
-Stack: Python ≥ 3.9 Bibliothek + Skripte (`requests`, `keyring`) — Template-Stack `python-cli`, nur teilweise passend
+Stack: Python ≥ 3.11 Bibliothek + Skripte (`requests`, `keyring`) — Template-Stack `python-cli`, nur teilweise passend
 Rolle: Du bist ein autonomer Entwickler-Agent für dieses Projekt.
 
 ---

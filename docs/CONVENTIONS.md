@@ -1,6 +1,6 @@
 # Coding Conventions – all-inkl-kas-sdk
 
-Stack: Python 3.9+ (laut `pyproject.toml`; CI 3.9/3.11/3.13) | `requests`, `keyring`, `tabulate`, `python-dotenv`;
+Stack: Python 3.11+ (laut `pyproject.toml`, ADR-001; CI 3.11/3.13/3.15) | `requests`, `keyring`, `tabulate`, `python-dotenv`;
 dev: `pytest`, `beautifulsoup4` | Datenbank: keine
 
 > Gilt **zusammen mit** `docs/CONVENTIONS_COMMON.md` (stack-übergreifend: Commit-Format, Encoding,
@@ -30,7 +30,7 @@ Commit-Pflicht pro Inkrement: `docs/KICKOFF.md` Phase 3b. Stack-spezifisch nur:
 
 - **Type Hints:** Vollständig für alle Parameter und Rückgabewerte neuer oder geänderter Funktionen. Optionale
   Parameter explizit als `Optional[str] = None` (der Bestand nutzt oft `str = None` — beim Anfassen korrigieren).
-  Mindestversion 3.9: kein `X | None` in Laufzeit-Annotationen ohne `from __future__ import annotations`.
+  Mindestversion 3.11 (ADR-001): `X | None` ist erlaubt.
 - **mypy streng:** `pyproject.toml` → `[tool.mypy]` mit `strict = true` (Gate 3). Lockerungen nur per
   `[[tool.mypy.overrides]]` für ein benanntes Modul mit Begründung als Kommentar (z. B. Drittbibliothek ohne Typen);
   `# type: ignore` nur mit Fehlercode (`# type: ignore[attr-defined]`), nie pauschal. **Stand:** mypy ist noch nicht

@@ -18,7 +18,7 @@ Release-Tags. Abschnitte zu Staging, Health-Endpoints und Datenbank-Migrationen 
 | Umgebung | Zweck | Datenquelle | Wer darf deployen |
 |---|---|---|---|
 | dev | Lokale Entwicklung und Offline-Tests | XML-Fixtures in `tests/`, Dry-Run | Entwickler:in |
-| CI | `pytest` auf Python 3.9 / 3.11 / 3.13 bei Push und Pull Request auf `main` | Fixtures, kein Netz, keine Secrets | GitHub Actions |
+| CI | `pytest` auf Python 3.11 / 3.13 / 3.15 bei Push und Pull Request auf `main` | Fixtures, kein Netz, keine Secrets | GitHub Actions |
 | Nutzer-Installation | Einsatz gegen einen echten KAS-Account | Live-API des Hosters | jede:r Nutzer:in für den eigenen Account |
 
 Unterschiede zwischen Umgebungen werden ausschließlich über Konfiguration

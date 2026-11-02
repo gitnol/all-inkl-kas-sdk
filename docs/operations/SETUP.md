@@ -4,7 +4,7 @@
 
 ## Voraussetzungen
 
-- Python ≥ 3.9 (`python --version` prüfen); empfohlen eine noch unterstützte Version (3.11–3.14), da 3.9 EOL ist
+- Python ≥ 3.11 (`python --version` prüfen); empfohlen 3.15 (Updates bis 2031-10)
 - pip (kommt mit Python), Git
 - Für Tests und Entwicklung: **kein** KAS-Account nötig — alle Tests laufen offline
 - Für echte Läufe der Skripte: ein KAS-Login mit Passwort (möglichst ein Unter-Account, `docs/security/AUTHENTICATION.md`)

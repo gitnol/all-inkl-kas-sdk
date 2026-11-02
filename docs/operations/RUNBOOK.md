@@ -72,7 +72,7 @@ python scripts/export_account.py
 
 ## Deployment-Checkliste
 
-- [ ] Python ≥ 3.9 (empfohlen ≥ 3.11) auf dem System installiert
+- [ ] Python ≥ 3.11 (empfohlen 3.15) auf dem System installiert
 - [ ] `pip install -e .` (bzw. `.[dev]`) in aktiver venv ausgeführt
 - [ ] Zugangsdaten im Keyring oder in der Umgebung, **nicht** im Skript
 - [ ] Lauf ohne Schreibzugriff erfolgreich durchgelaufen und Ausgabe geprüft

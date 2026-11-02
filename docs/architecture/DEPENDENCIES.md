@@ -13,7 +13,7 @@ Sicherheitsbewertung: `docs/security/DEPENDENCY_AUDIT.md`.
 | `requests` | `≥ 2.0.0` (geplant `≥ 2.32.4`, I6) | HTTPS-POST an die SOAP-API (`kas_sdk/client.py`) | SDK funktionslos — einziger Transport |
 | `keyring` | `≥ 25.0.0` | Passwort aus dem System-Keyring (Client: optional per `import` im `try`; `kas_sdk/utils.py`: Pflicht-Import) | Client: Warnung, Passwort muss per Argument/Env kommen; Skripte über `utils`: Import-Fehler |
 | `tabulate` | `≥ 0.9.0` | Tabellenausgabe in Skripten und im Export (`kas_sdk/utils.py`, `scripts/*.py`) | Skripte brechen beim Import ab; die Bibliothek selbst nicht |
-| `python-dotenv` | `≥ 1.2.2` ab Python 3.10, sonst `≥ 1.0.0` (I11) | lädt `.env` beim Import von `kas_sdk.client` | still übersprungen (`ImportError` wird ignoriert); Werte müssen in der Umgebung stehen |
+| `python-dotenv` | `≥ 1.2.2` (I11, ohne Marker seit I12) | lädt `.env` beim Import von `kas_sdk.client` | still übersprungen (`ImportError` wird ignoriert); Werte müssen in der Umgebung stehen |
 
 ### Sicherheits-Floors für transitive Pakete
 
@@ -24,8 +24,8 @@ und `requirements.txt`, damit pip keine Version mit bekannter Lücke installiert
 | Paket | Untergrenze | Grund | Gilt für |
 |-------|-------------|-------|----------|
 | `certifi` | `≥ 2026.10.19` | GHSA-6q48-6c7w-9gw2 (Critical): kompromittierte emSign-Wurzeln entfernt; `requests` prüft das TLS-Zertifikat der KAS-API gegen dieses Bündel | alle Python-Versionen |
-| `urllib3` | `≥ 2.8.0` | CVE-2026-97687 (HTTPS-Proxy-TLS), CVE-2026-97689, CVE-2026-97688 | nur Python ≥ 3.10 (Marker) — 2.8.0 verlangt Python ≥ 3.10; unter 3.9 wird `urllib3` 2.6.3 aufgelöst (`uv pip compile --python-version 3.9`), ohne diese Fixes (I6, ADR-001) |
-| `python-dotenv` | `≥ 1.2.2` | CVE-2026-28684 (betrifft das SDK nicht, nur mitgezogen) | nur Python ≥ 3.10 (Marker), unter 3.9 bleibt `≥ 1.0.0` |
+| `urllib3` | `≥ 2.8.0` | CVE-2026-97687 (HTTPS-Proxy-TLS), CVE-2026-97689, CVE-2026-97688 | alle zulässigen Python-Versionen (ab I12, ADR-001) |
+| `python-dotenv` | `≥ 1.2.2` | CVE-2026-28684 (betrifft das SDK nicht, nur mitgezogen) | alle zulässigen Python-Versionen (ab I12) |
 
 Prüfung ohne Netz: `tests/test_dependency_floors.py` vergleicht die installierten Versionen
 (`importlib.metadata`) mit den Untergrenzen aus `pyproject.toml` und prüft, dass `requirements.txt` dieselben
@@ -74,7 +74,7 @@ Die KAS-API ist ein Fremdsystem ohne Testumgebung: Jeder echte Aufruf wirkt auf 
 
 | Ressource | Version / Pfad | Zweck |
 |-----------|---------------|-------|
-| Python | ≥ 3.9 (`requires-python`) | keine Sprachfeatures jenseits 3.9 im Einsatz; 3.9 ist EOL (I6) |
+| Python | ≥ 3.11 (`requires-python`, ADR-001), Ziel 3.15 | älteste noch unterstützte Version; 3.11 endet 2027-10 |
 | System-Keyring-Backend | Windows Credential Manager / macOS Keychain / Secret Service (Linux) | Ablage des KAS-Passworts (Dienst `kas_api`) |
 | Expat (über Python) | lokal geprüft 2.8.1 | XML-Parsing der Antworten |
 

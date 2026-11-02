@@ -115,11 +115,7 @@ Behebt `security/THREAT_MODEL.md` Bedrohung 5; Befunde in `security/DEPENDENCY_A
 
 **Aufgaben:**
 
-- [ ] ADR-001: Python-Mindestversion (3.9 EOL 2025-10-31, 3.10 EOL 2026-10-31) — Optionen, Folgen für Nutzer
-- [ ] `requires-python` und CI-Matrix gemäß ADR; Untergrenze `requests>=2.32.4` in `pyproject.toml` und `requirements.txt`
-- [ ] Rest aus I11: Fällt Python 3.9 weg, die Marker `python_version >= "3.10"` an den Floors für `urllib3` und
-      `python-dotenv` entfernen (beide Dateien; `tests/test_dependency_floors.py` prüft den Gleichlauf) — bis dahin
-      fehlen unter 3.9 die `urllib3`-Fixes aus 2.8.0
+- [ ] Untergrenze `requests>=2.32.4` in `pyproject.toml` und `requirements.txt` (Python-Mindestversion: I12, ADR-001)
 - [ ] `pip-audit` lokal ausführen, Ergebnis datiert in `security/DEPENDENCY_AUDIT.md`; Schritt in CI
 - [ ] CI härten: `permissions: contents: read`, Actions per Commit-SHA mit Versionskommentar
 - [ ] Docs: `architecture/DEPENDENCIES.md`, `operations/DEPLOYMENT.md` (Lockfile-Entscheidung)

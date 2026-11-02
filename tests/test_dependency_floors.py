@@ -5,19 +5,15 @@ installed in the running environment (importlib.metadata). No network access.
 A stale environment (e.g. an old certifi bundle) makes these tests fail.
 """
 
-import sys
+import tomllib
 import unittest
 from importlib import metadata
 from pathlib import Path
 
 from packaging.requirements import Requirement
+from packaging.specifiers import SpecifierSet
 from packaging.utils import canonicalize_name
 from packaging.version import Version
-
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -25,11 +21,17 @@ ROOT = Path(__file__).resolve().parents[1]
 # docs/security/DEPENDENCY_AUDIT.md, sweep 2026-10-23).
 SECURITY_FLOOR_PACKAGES = ("certifi", "urllib3", "python-dotenv")
 
+# Oldest Python that still receives security updates (ADR-001).
+MIN_PYTHON = Version("3.11")
+
+
+def _pyproject():
+    with open(ROOT / "pyproject.toml", "rb") as fh:
+        return tomllib.load(fh)
+
 
 def _project_requirements():
-    with open(ROOT / "pyproject.toml", "rb") as fh:
-        data = tomllib.load(fh)
-    return [Requirement(line) for line in data["project"]["dependencies"]]
+    return [Requirement(line) for line in _pyproject()["project"]["dependencies"]]
 
 
 def _requirements_txt():
@@ -90,7 +92,7 @@ class TestSecurityFloors(unittest.TestCase):
                 )
                 floors = [f for f in map(_floor, _applicable(entries)) if f is not None]
                 if not floors:
-                    continue  # no floor applies to this interpreter (e.g. urllib3 on 3.9)
+                    continue  # no floor applies to this interpreter
                 floor = max(floors)
                 installed = Version(metadata.version(name))
                 self.assertGreaterEqual(
@@ -98,6 +100,18 @@ class TestSecurityFloors(unittest.TestCase):
                     floor,
                     f"{name} {installed} is below the security floor {floor}",
                 )
+
+
+class TestMinimumPython(unittest.TestCase):
+    def test_requires_python_excludes_unsupported_versions(self):
+        spec = SpecifierSet(_pyproject()["project"]["requires-python"])
+        self.assertIn(MIN_PYTHON, spec)
+        self.assertNotIn(Version("3.10.99"), spec)
+
+    def test_no_markers_for_unsupported_versions(self):
+        for path in (ROOT / "pyproject.toml", ROOT / "requirements.txt"):
+            with self.subTest(file=path.name):
+                self.assertNotIn("python_version", path.read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":
